@@ -1,4 +1,4 @@
-# Cordova plugin for Luxand Face SDK
+# Topdata - Cordova plugin for Luxand Face SDK
 Cross-platform Face Recognition using Luxand Face SDK framework
 
 # Supported Platforms:
