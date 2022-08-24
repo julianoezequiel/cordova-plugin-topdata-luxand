@@ -17,16 +17,16 @@ fs.ensureDirSync = function (dir) {
 };
 
  
-var LUXAND_PLUGIN_DIR = "plugins/cordova-plugin-topdata-luxand";
+var LUXAND_PLUGIN_DIR = "plugins/cordova-plugin-luxand";
 
 var PLUGINS = {
     LUXAND: [
          {
-            dest: LUXAND_PLUGIN_DIR + '/libfsdk-static.a',
+            dest: 'luxand-binary/libfsdk-static.a',
             src: "libfsdk-static.a"
          },
          {
-            dest: LUXAND_PLUGIN_DIR + '/libfsdk-static_64.a',
+            dest: 'luxand-binary/libfsdk-static_64.a',
             src: "libfsdk-static_64.a"
          }
     ]
