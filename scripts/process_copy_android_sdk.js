@@ -17,7 +17,7 @@ fs.ensureDirSync = function (dir) {
 };
 
  
-var LUXAND_PLUGIN_DIR = "plugins/cordova-plugin-luxand";
+var LUXAND_PLUGIN_DIR = "plugins/cordova-plugin-topdata-luxand";
 
 var PLUGINS = {
     LUXAND: [
