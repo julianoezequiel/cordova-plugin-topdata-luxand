@@ -11,11 +11,11 @@ This plugin supports following platforms:
 
 This requires cordova 7+
 
-`cordova plugin add cordova-plugin-luxand`
+`cordova plugin add cordova-plugin-topdata-luxand`
 
 Or directrly via this repoitory :
 
-`https://github.com/molobala/cordova-plugin-luxand.git`
+`https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand.git`
 
 Note: 
 You need to put luxand binay files (downloadable [here](https://drive.google.com/open?id=11Nfjnpwsrzmf0isIMPkdtTYqWt8eG-1G)) to your project root before installation

@@ -1,5 +1,5 @@
 {
-  "name": "cordova-plugin-luxand",
+  "name": "cordova-plugin-topdata-luxand",
   "version": "0.0.1",
   "description": "Face SDK lucand",
   "cordova": {
@@ -17,10 +17,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/molobala/cordova-plugin-luxand.git"
+    "url": "git+https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand.git"
   },
   "bugs": {
-    "url": "https://github.com/molobala/cordova-plugin-luxand/issues"
+    "url": "https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand/issues"
   },
-  "homepage": "https://github.com/molobala/cordova-plugin-luxand#readme"
+  "homepage": "https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand#readme"
 }
