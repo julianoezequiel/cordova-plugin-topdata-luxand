@@ -23,15 +23,15 @@ var PLUGINS = {
     LUXAND: [
          {
             dest: LUXAND_PLUGIN_DIR + '/armeabi-v7a-libfsdk.so',
-            src: "armeabi-v7a-libfsdk.so"
+            src: "luxand-binary/armeabi-v7a-libfsdk.so"
          },
          {
             dest: LUXAND_PLUGIN_DIR + '/arm64-v8a-libfsdk.so',
-            src: "arm64-v8a-libfsdk.so"
+            src: "luxand-binary/arm64-v8a-libfsdk.so"
          },
          {
             dest: LUXAND_PLUGIN_DIR + '/x86-libfsdk.so',
-            src: "x86-libfsdk.so"
+            src: "luxand-binary/x86-libfsdk.so"
          }
     ]
 };
