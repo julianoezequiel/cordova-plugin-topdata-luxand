@@ -22,12 +22,12 @@ var LUXAND_PLUGIN_DIR = "plugins/cordova-plugin-topdata-luxand";
 var PLUGINS = {
     LUXAND: [
          {
-            dest: 'luxand-binary/libfsdk-static.a',
-            src: "libfsdk-static.a"
+            dest: LUXAND_PLUGIN_DIR + '/libfsdk-static.a',
+            src: "luxand-binary/libfsdk-static.a"
          },
          {
-            dest: 'luxand-binary/libfsdk-static_64.a',
-            src: "libfsdk-static_64.a"
+            dest: LUXAND_PLUGIN_DIR + '/libfsdk-static_64.a',
+            src: "luxand-binary/libfsdk-static_64.a"
          }
     ]
 };
