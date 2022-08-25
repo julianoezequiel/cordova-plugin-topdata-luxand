@@ -40,8 +40,8 @@ Luxand.register({
 });
 ```
 
-O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado
-O parâmetro `template` template do rosto
+O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado.
+O parâmetro `template` template do rosto.
 
 Para comparar faces, utilize o método `compare` method on the plugin like this
 
@@ -55,8 +55,8 @@ Luxand.compare({
 });
 ```
 
-O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado
-O parâmetro `template` template do rosto
+O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado.
+O parâmetro `template` template do rosto.
 
 Para limpar a memória do plugin, utilize o método `clearMemory` (limpeza feita no arquivo local onde os modelos de rostos são armazenados)
 ```js
