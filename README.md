@@ -9,7 +9,7 @@ Este plugin suporta as seguintes plataformas:
 
 ## Instalação
 
-`cordova plugin add https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand`
+`ionic cordova plugin add https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand`
 
 Note: 
 Você precisa colocar os arquivos luxand binay (donwload [aqui](https://drive.google.com/open?id=11Nfjnpwsrzmf0isIMPkdtTYqWt8eG-1G) na raiz do seu projeto antes da instalação.
