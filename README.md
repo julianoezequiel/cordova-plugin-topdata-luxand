@@ -11,9 +11,6 @@ Este plugin suporta as seguintes plataformas:
 
 `ionic cordova plugin add https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand.git`
 
-Note: 
-Você precisa colocar os arquivos luxand binary (download [aqui](https://drive.google.com/open?id=11Nfjnpwsrzmf0isIMPkdtTYqWt8eG-1G)) dentro de uma pasta chamada luxand-binary (criar se necessário), na raiz do seu projeto antes da instalação.
-
 ## Uso
 Antes de usar o plugin, você deve iniciá-lo com sua chave de licença da luxand, chamando o método `init`:
 
