@@ -371,7 +371,7 @@ class ProcessImageAndDrawResults extends View {
         FSDK.FreeImage(imagem);
 
         // As faces são iguais?
-        return similarity[0] > 0.99f ? true : false;
+        return similarity[0] > 0.95f ? true : false;
     }
 
     private String performRegistrationAgain(long id) {
