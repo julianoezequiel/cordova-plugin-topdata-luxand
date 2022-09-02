@@ -51,7 +51,7 @@ public class OMLLuxand extends Activity implements OnClickListener {
         Bundle data = getIntent().getExtras();
         if (data != null) {
             this.database = data.getString("DB_NAME", "memory.dat");
-            Log.e("com.luxand.dsi", database);
+            Log.i("com.luxand.dsi", database);
             this.loginTryCount = data.getInt("LOGIN_TRY_COUNT", 3);
             this.launchType = data.getString("TYPE", "FOR_REGISTER");
             this.timeOut = data.getInt("TIMEOUT", 15000);
@@ -286,7 +286,3 @@ public class OMLLuxand extends Activity implements OnClickListener {
         return getResources().getIdentifier(name, type, getPackageName());
     }
 }
-
-
-
-

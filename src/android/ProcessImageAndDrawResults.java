@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -15,7 +16,7 @@ import com.luxand.FSDK;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Base64;
+
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.locks.Lock;
@@ -132,9 +133,11 @@ class ProcessImageAndDrawResults extends View {
         FSDK.HImage RotatedImage = new FSDK.HImage();
         FSDK.CreateEmptyImage(RotatedImage);
 
-        //it is necessary to work with local variables (onDraw called not the time when mImageWidth,... being reassigned, so swapping mImageWidth and mImageHeight may be not safe)
+        //it is necessary to work with local variables (onDraw called not the time when mImageWidth,
+        // being reassigned, so swapping mImageWidth and mImageHeight may be not safe)
         int ImageWidth = mImageWidth;
         //int ImageHeight = mImageHeight;
+
         if (rotated) {
             ImageWidth = mImageHeight;
             //ImageHeight = mImageWidth;
@@ -191,7 +194,12 @@ class ProcessImageAndDrawResults extends View {
             res = FSDK.GetValueConfidence(value[0], "Liveness", liveness);
         }
 
-        if (liveness[0] > 0.999f) {
+        float livenessMaior = 0f;
+
+        livenessMaior = liveness[0] > livenessMaior ? liveness[0] : livenessMaior;
+        Log.d("LIVENESS_MAIOR", String.valueOf(livenessMaior));
+
+        if (liveness[0] > 0.5f) {
             Log.d("LIVENESS", "Está vivo");
 
             if (!this.isRegister) {
@@ -208,7 +216,6 @@ class ProcessImageAndDrawResults extends View {
                         canvas.drawRect(mFacePositions[i].x1, mFacePositions[i].y1, mFacePositions[i].x2, mFacePositions[i].y2, mPaintBlueTransparent);
                         identified = identified || compararTemplates(RotatedImage);
                     }
-                    Log.e("com.luxand.dsi.Ident", identified + "");
 
                     if (this.loginCount <= loginTryCount && this.identified) {
                         correspondingId = IDs[0];
@@ -248,7 +255,6 @@ class ProcessImageAndDrawResults extends View {
                         }
                     } else {
                         String name = this.performRegistrationAgain(IDs[0]);
-                        Log.e("com.luxand.dsi::", name);
 
                         // Falha ao cadastrar/encontrar a face
                         if (name == null || !name.equals(generatedName)) {
@@ -262,8 +268,8 @@ class ProcessImageAndDrawResults extends View {
                         registerCheckCount++;
                         canvas.drawRect(mFacePositions[0].x1, mFacePositions[0].y1, mFacePositions[0].x2, mFacePositions[0].y2, mPaintBlueTransparent);
 
-                        // Face cadastrada com sucesso
-                        if (registerCheckCount >= loginTryCount) {
+                        // Face registrada
+                        //if (registerCheckCount >= loginTryCount) {
                             boolean ok = getTemplate(RotatedImage);
 
                             if (!ok) {
@@ -278,7 +284,7 @@ class ProcessImageAndDrawResults extends View {
                             response(false, "REGISTERED", template);
                             mStopping = 1;
                             return;
-                        }
+                        //}
                     }
                 }
             }
@@ -337,7 +343,7 @@ class ProcessImageAndDrawResults extends View {
 
         // Busca o template
         int ok = FSDK.GetFaceTemplate(imagem, FaceTemplate);
-        this.template = Base64.getEncoder().encodeToString(FaceTemplate.template);
+        this.template = Base64.encodeToString(FaceTemplate.template, Base64.DEFAULT);
 
         // Limpa a imagem
         FSDK.FreeImage(imagem);
@@ -353,7 +359,7 @@ class ProcessImageAndDrawResults extends View {
 
         // Decodifica o template de referência: base64 -> array de bytes 
         FSDK.HTracker tracker = new FSDK.HTracker();
-        byte[] templateBytes = Base64.getDecoder().decode(this.templateInit);
+        byte[] templateBytes = Base64.decode(this.templateInit, Base64.DEFAULT);
         FSDK.FSDK_FaceTemplate FaceTemplateRef = new FSDK.FSDK_FaceTemplate();
         FaceTemplateRef.template = templateBytes;
 
@@ -362,7 +368,7 @@ class ProcessImageAndDrawResults extends View {
         int ok = FSDK.GetFaceTemplate(imagem, FaceTemplateDetected);
 
         // Codifica o template da face detectada: array de bytes -> base64
-        this.template = Base64.getEncoder().encodeToString(FaceTemplateDetected.template);
+        this.template = Base64.encodeToString(FaceTemplateDetected.template, Base64.DEFAULT);
 
         float[] similarity = new float[1];
         FSDK.MatchFaces(FaceTemplateDetected, FaceTemplateRef, similarity);
