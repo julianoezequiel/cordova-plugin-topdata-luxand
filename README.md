@@ -22,7 +22,7 @@ Luxand.init({
 }, r=>{}, err=>{});
 ```
 -  `licence` é a sua chave de licença
--  `loginTryCoun`t é o número de repetições para o processo de login e registro
+-  `loginTryCount` é o número de repetições para o processo de login e registro
 -  `dbname` é onde os modelos de faces de arquivo locais serão salvos.
 
 Este plugin permite que você registre um usuário usando seu modelo de rosto e o reconheça posteriormente. O registro é realizado uma vez e apenas uma vez para um usuário. Para registrar um usuário chame o método `register` no plugin:
@@ -39,8 +39,8 @@ Luxand.register({
 
 - O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado.
 - O parâmetro `template` template do rosto.
-- O parâmetro `liveness` parâmetro de vivacidade.
-- O parâmetro `matchFaces` parâmetro de similaridade entre os templates.
+- O parâmetro `liveness` parâmetro de vivacidade (Ex: 0.7).
+- O parâmetro `matchFaces` parâmetro de similaridade entre os templates (Ex: 0.95).
 
 Para comparar faces, utilize o método `compare` method on the plugin like this
 
@@ -56,8 +56,8 @@ Luxand.compare({
 
 - O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado.
 - O parâmetro `template` template do rosto.
-- O parâmetro `liveness` parâmetro de vivacidade.
-- O parâmetro `matchFaces` parâmetro de similaridade entre os templates.
+- O parâmetro `liveness` parâmetro de vivacidade (Ex: 0.7).
+- O parâmetro `matchFaces` parâmetro de similaridade entre os templates (Ex: 0.95).
 
 Para limpar a memória do plugin, utilize o método `clearMemory` (limpeza feita no arquivo local onde os modelos de rostos são armazenados)
 ```js
