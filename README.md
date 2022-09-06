@@ -29,8 +29,8 @@ Este plugin permite que você registre um usuário usando seu modelo de rosto e 
 
 ```js
 Luxand.register({
-  timeout: 120000
-}, "template aqui").then(async (r) => {
+  timeout: <timeout>
+}, <template>, <liveness>, <matchFaces>).then(async (r) => {
   console.log("Cadastro da face realizado com sucesso", r);
 }).catch(async (err) => {
   console.log("Falha ao cadastrar face", err);
@@ -39,13 +39,15 @@ Luxand.register({
 
 - O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado.
 - O parâmetro `template` template do rosto.
+- O parâmetro `liveness` parâmetro de vivacidade.
+- O parâmetro `matchFaces` parâmetro de similaridade entre os templates.
 
 Para comparar faces, utilize o método `compare` method on the plugin like this
 
 ```js
 Luxand.compare({
-  timeout: 120000
-}, "template aqui").then(async (r) => {
+  timeout: <timeout>
+}, <template>, <liveness>, <matchFaces>).then(async (r) => {
   console.log("Comparação da face realizado com sucesso", r);
 }).catch(async (err) => {
   console.log("Falha ao comparar face", err);
@@ -54,6 +56,8 @@ Luxand.compare({
 
 - O parâmetro `timeout` é o número de milissegundos a partir do qual o plugin deve retornar se nenhum rosto for detectado.
 - O parâmetro `template` template do rosto.
+- O parâmetro `liveness` parâmetro de vivacidade.
+- O parâmetro `matchFaces` parâmetro de similaridade entre os templates.
 
 Para limpar a memória do plugin, utilize o método `clearMemory` (limpeza feita no arquivo local onde os modelos de rostos são armazenados)
 ```js
