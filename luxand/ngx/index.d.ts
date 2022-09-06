@@ -26,6 +26,12 @@ export interface OMLFacialData {
 
     /** Template da face (formato BASE64) */
     template: string;
+    
+    /** Parâmetro de vivacidade */
+    liveness: number;
+
+    /** Parâmetro de similaridade entre os templates */
+    matchFaces: number;
 }
 
 export enum STATUS_FSDK {
@@ -56,7 +62,7 @@ export declare class LuxandOriginal extends IonicNativePlugin {
      * @param template Template do rosto obtido do servidor (caso houver)
      * @return {Promise<OMLFacialData>} Retorna uma Promise que resolve se um rosto foi detectado e reconhecido como um novo rosto
      */
-    register(params: { timeout: number }, template: string): Promise<OMLFacialData>;
+    register(params: { timeout: number }, template: string, liveness: number, matchFaces: number): Promise<OMLFacialData>;
 
     /**
      * Compara se o template da rosto detectada é igual ao template original
@@ -64,7 +70,7 @@ export declare class LuxandOriginal extends IonicNativePlugin {
      * @param template Template do rosto obtido do servidor
      * @return {Promise<OMLFacialData>} Retorna uma Promise que resolve se o template do rosto detectado é igual ao template original
      */
-    compare(params: { timeout: number }, template: string): Promise<OMLFacialData>;
+    compare(params: { timeout: number }, template: string, liveness: number, matchFaces: number): Promise<OMLFacialData>;
 
     /**
      * Realiza a limpeza na base local por ID

@@ -30,6 +30,8 @@ public class OMLLuxand extends Activity implements OnClickListener {
     private int loginTryCount = 3;
     private int timeOut;
     private String template = "";
+    float livenessParam = 0f;
+    float matchFacesParam = 0f;
     private String launchType = "FOR_REGISTER";
     private final String help_text = "Luxand Face Recognition\n\nJust tap any detected face and name it. The app will recognize this face further. For best results, hold the device at arm's length. You may slowly rotate the head for the app to memorize you at multiple views. The app can memorize several persons. If a face is not recognized, tap and name it again.\n\nThe SDK is available for mobile developers: www.luxand.com/facesdk";
 
@@ -56,10 +58,12 @@ public class OMLLuxand extends Activity implements OnClickListener {
             this.launchType = data.getString("TYPE", "FOR_REGISTER");
             this.timeOut = data.getInt("TIMEOUT", 15000);
             this.template = data.getString("TEMPLATE", "");
+            this.livenessParam = data.getFloat("LIVENESS_PARAM", 0.7f);
+            this.matchFacesParam = data.getFloat("MATCH_FACES_PARAM", 0.95f);
         }
 
         // Inializa o processamento da face e desenha os resultados
-        mDraw = new ProcessImageAndDrawResults(this, this.launchType.equals("FOR_REGISTER"), loginTryCount, timeOut, template);
+        mDraw = new ProcessImageAndDrawResults(this, this.launchType.equals("FOR_REGISTER"), loginTryCount, timeOut, template, livenessParam, matchFacesParam);
 
         mDraw.setOnImageProcessListener(new OnImageProcessListener() {
             @Override

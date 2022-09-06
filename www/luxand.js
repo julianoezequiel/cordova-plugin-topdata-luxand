@@ -7,7 +7,7 @@ exports.init = function (config, success, error) {
     console.log(config);
     exec(success, error, 'Luxand', 'init', [licence, dbname, tryCount]);
 };
-exports.register = function (params, template, success, error) {
+exports.register = function (params, template, liveness, matchFaces, success, error) {
     exec((data)=>{
         console.log("data:"+JSON.stringify(data));
         delete data.error;
@@ -17,9 +17,9 @@ exports.register = function (params, template, success, error) {
         }else {
             return error(data);
         }
-    }, error, 'Luxand', 'register', [params.timeout || -1, template]);
+    }, error, 'Luxand', 'register', [params.timeout || -1, template, liveness, matchFaces]);
 };
-exports.compare = function (params, template, success, error) {
+exports.compare = function (params, template, liveness, matchFaces, success, error) {
     exec((data)=>{
         delete data.error;
         //data.extra = JSON.parse(data.extra || "{}");
@@ -28,7 +28,7 @@ exports.compare = function (params, template, success, error) {
         }else {
             return error(data);
         }
-    }, error, 'Luxand', 'compare', [params.timeout || -1, template]);
+    }, error, 'Luxand', 'compare', [params.timeout || -1, template, liveness, matchFaces]);
 };
 exports.clear = function (id, success, error) {
     exec((data)=>{

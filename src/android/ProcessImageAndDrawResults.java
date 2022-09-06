@@ -56,16 +56,20 @@ class ProcessImageAndDrawResults extends View {
     private String generatedName;
     private String name;
     private String template = "";
+    private float livenessParam = 0f;
+    private float matchFacesParam = 0f;
     private String templateInit;
 
     public static final int ALREADY_REGISTERED = 1;
     public static final int REGISTERED = 2;
     public static final int NOT_REGISTERED = 3;
 
-    public ProcessImageAndDrawResults(Context context, boolean isRegister, int loginTryCount, int timeOut, String templateRef) {
+    public ProcessImageAndDrawResults(Context context, boolean isRegister, int loginTryCount, int timeOut, String templateRef, float livenessParam, float matchFacesParam) {
         super(context);
         this.timeOut = timeOut;
         this.templateInit = templateRef;
+        this.livenessParam = livenessParam;
+        this.matchFacesParam = matchFacesParam;
 
         this.isRegister = isRegister;
         this.loginTryCount = loginTryCount;
@@ -198,8 +202,10 @@ class ProcessImageAndDrawResults extends View {
 
         livenessMaior = liveness[0] > livenessMaior ? liveness[0] : livenessMaior;
         Log.d("LIVENESS_MAIOR", String.valueOf(livenessMaior));
-
-        if (liveness[0] > 0.5f) {
+        
+        Log.d("LIVENESS_PARAM", String.valueOf(this.livenessParam));
+        
+        if (liveness[0] > this.livenessParam) {
             Log.d("LIVENESS", "Está vivo");
 
             if (!this.isRegister) {
@@ -270,20 +276,20 @@ class ProcessImageAndDrawResults extends View {
 
                         // Face registrada
                         //if (registerCheckCount >= loginTryCount) {
-                            boolean ok = getTemplate(RotatedImage);
+                        boolean ok = getTemplate(RotatedImage);
 
-                            if (!ok) {
-                                response(true, "ERROR_GET_TEMPLATE", "");
-                                mStopping = 1;
-                                return;
-                            }
-
-                            this.name = name;
-                            this.correspondingId = IDs[0];
-
-                            response(false, "REGISTERED", template);
+                        if (!ok) {
+                            response(true, "ERROR_GET_TEMPLATE", "");
                             mStopping = 1;
                             return;
+                        }
+
+                        this.name = name;
+                        this.correspondingId = IDs[0];
+
+                        response(false, "REGISTERED", template);
+                        mStopping = 1;
+                        return;
                         //}
                     }
                 }
@@ -376,8 +382,10 @@ class ProcessImageAndDrawResults extends View {
         // Limpa a imagem
         FSDK.FreeImage(imagem);
 
+        Log.d("MATCH_FACES_PARAM", String.valueOf(this.matchFacesParam));
+        
         // As faces são iguais?
-        return similarity[0] > 0.95f ? true : false;
+        return similarity[0] > this.matchFacesParam ? true : false;
     }
 
     private String performRegistrationAgain(long id) {

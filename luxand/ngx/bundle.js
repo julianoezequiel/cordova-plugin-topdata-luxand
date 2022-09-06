@@ -12,8 +12,8 @@ var Luxand = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     Luxand.prototype.init = function (config) { return core.cordova(this, "init", {}, arguments); };
-    Luxand.prototype.register = function (params, template) { return core.cordova(this, "register", {}, arguments); };
-    Luxand.prototype.compare = function (params, template) { return core.cordova(this, "compare", {}, arguments); };
+    Luxand.prototype.register = function (params, template, liveness, matchFaces) { return core.cordova(this, "register", {}, arguments); };
+    Luxand.prototype.compare = function (params, template, liveness, matchFaces) { return core.cordova(this, "compare", {}, arguments); };
     Luxand.prototype.clear = function (id) { return core.cordova(this, "clear", {}, arguments); };
     Luxand.prototype.clearMemory = function () { return core.cordova(this, "clearMemory", {}, arguments); };
     Luxand.pluginName = "Luxand";

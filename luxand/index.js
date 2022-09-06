@@ -18,8 +18,8 @@ var LuxandOriginal = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     LuxandOriginal.prototype.init = function (config) { return cordova(this, "init", {}, arguments); };
-    LuxandOriginal.prototype.register = function (params, template) { return cordova(this, "register", {}, arguments); };
-    LuxandOriginal.prototype.compare = function (params, template) { return cordova(this, "compare", {}, arguments); };
+    LuxandOriginal.prototype.register = function (params, template, liveness, matchFaces) { return cordova(this, "register", {}, arguments); };
+    LuxandOriginal.prototype.compare = function (params, template, liveness, matchFaces) { return cordova(this, "compare", {}, arguments); };
     LuxandOriginal.prototype.clear = function (id) { return cordova(this, "clear", {}, arguments); };
     LuxandOriginal.prototype.clearMemory = function () { return cordova(this, "clearMemory", {}, arguments); };
     LuxandOriginal.pluginName = "Luxand";

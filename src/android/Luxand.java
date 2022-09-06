@@ -33,6 +33,8 @@ public class Luxand extends CordovaPlugin {
     private static int loginTryCount;
     private JSONArray reqArgs;
     String template = "";
+    float livenessParam = 0f;
+    float matchFacesParam = 0f;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -47,6 +49,8 @@ public class Luxand extends CordovaPlugin {
                 return true;
             case "register":
                 template = reqArgs.getString(1);
+                livenessParam = (float) reqArgs.get(2);
+                matchFacesParam = (float) reqArgs.get(3);
 
                 if (!hasPermisssion()) {
                     requestPermissions(REGISTER_CODE);
@@ -57,6 +61,8 @@ public class Luxand extends CordovaPlugin {
                 return true;
             case "compare":
                 template = reqArgs.getString(1);
+                livenessParam = (float) reqArgs.get(2);
+                matchFacesParam = (float) reqArgs.get(3);
 
                 if (!hasPermisssion()) {
                     requestPermissions(COMPARE_CODE);
@@ -222,6 +228,8 @@ public class Luxand extends CordovaPlugin {
 
             intent.putExtra("TYPE", requestType);
             intent.putExtra("TEMPLATE", template);
+            intent.putExtra("LIVENESS_PARAM", livenessParam);
+            intent.putExtra("MATCH_FACES_PARAM", matchFacesParam);
         }
 
         Log.i("com.luxand.dsi::", "" + intent.getExtras());
