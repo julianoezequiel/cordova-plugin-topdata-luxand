@@ -49,8 +49,8 @@ public class Luxand extends CordovaPlugin {
                 return true;
             case "register":
                 template = reqArgs.getString(1);
-                livenessParam = (float) reqArgs.get(2);
-                matchFacesParam = (float) reqArgs.get(3);
+                livenessParam = (float) reqArgs.getDouble(2);
+                matchFacesParam = (float) reqArgs.getDouble(3);
 
                 if (!hasPermisssion()) {
                     requestPermissions(REGISTER_CODE);
@@ -61,8 +61,8 @@ public class Luxand extends CordovaPlugin {
                 return true;
             case "compare":
                 template = reqArgs.getString(1);
-                livenessParam = (float) reqArgs.get(2);
-                matchFacesParam = (float) reqArgs.get(3);
+                livenessParam = (float) reqArgs.getDouble(2);
+                matchFacesParam = (float) reqArgs.getDouble(3);
 
                 if (!hasPermisssion()) {
                     requestPermissions(COMPARE_CODE);
