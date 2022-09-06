@@ -18,7 +18,6 @@ import org.json.JSONObject;
 
 
 import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -59,6 +58,8 @@ class ProcessImageAndDrawResults extends View {
     private float livenessParam = 0f;
     private float matchFacesParam = 0f;
     private String templateInit;
+
+    private FSDK.HImage imagemRef;
 
     public static final int ALREADY_REGISTERED = 1;
     public static final int REGISTERED = 2;
@@ -150,12 +151,14 @@ class ProcessImageAndDrawResults extends View {
             FSDK.CopyImage(Image, RotatedImage);
         }
 
+        imagemRef = RotatedImage;
+
         FSDK.FreeImage(Image);
 
         long IDs[] = new long[MAX_FACES];
         long face_count[] = new long[1];
 
-        FSDK.FeedFrame(mTracker, 0, RotatedImage, face_count, IDs);
+        FSDK.FeedFrame(mTracker, 0, imagemRef, face_count, IDs);
         //FSDK.FreeImage(RotatedImage);
 
         faceLock.lock();
@@ -202,9 +205,9 @@ class ProcessImageAndDrawResults extends View {
 
         livenessMaior = liveness[0] > livenessMaior ? liveness[0] : livenessMaior;
         Log.d("LIVENESS_MAIOR", String.valueOf(livenessMaior));
-        
+
         Log.d("LIVENESS_PARAM", String.valueOf(this.livenessParam));
-        
+
         if (liveness[0] > this.livenessParam) {
             Log.d("LIVENESS", "Está vivo");
 
@@ -220,7 +223,7 @@ class ProcessImageAndDrawResults extends View {
                     // Mark and name faces
                     for (int i = 0; i < face_count[0]; ++i) {
                         canvas.drawRect(mFacePositions[i].x1, mFacePositions[i].y1, mFacePositions[i].x2, mFacePositions[i].y2, mPaintBlueTransparent);
-                        identified = identified || compararTemplates(RotatedImage);
+                        identified = identified || compararTemplates(imagemRef);
                     }
 
                     if (this.loginCount <= loginTryCount && this.identified) {
@@ -250,7 +253,7 @@ class ProcessImageAndDrawResults extends View {
                         canvas.drawRect(mFacePositions[0].x1, mFacePositions[0].y1, mFacePositions[0].x2, mFacePositions[0].y2, mPaintBlueTransparent);
 
                         // Tenta realizar o cadastro da face
-                        int r = this.register(IDs[0], RotatedImage);
+                        int r = this.register(IDs[0], imagemRef);
 
                         if (r == REGISTERED) {
                             registerCheckCount = 1;
@@ -276,7 +279,7 @@ class ProcessImageAndDrawResults extends View {
 
                         // Face registrada
                         //if (registerCheckCount >= loginTryCount) {
-                        boolean ok = getTemplate(RotatedImage);
+                        boolean ok = getTemplate(imagemRef);
 
                         if (!ok) {
                             response(true, "ERROR_GET_TEMPLATE", "");
@@ -310,6 +313,9 @@ class ProcessImageAndDrawResults extends View {
      * @param template Template da face detectada
      */
     private void response(boolean error, String message, String template) {
+        FSDK.FreeImage(imagemRef);
+        FSDK.FreeTracker(mTracker);
+
         JSONObject obj = new JSONObject();
         try {
             obj.put("error", error);
@@ -352,7 +358,7 @@ class ProcessImageAndDrawResults extends View {
         this.template = Base64.encodeToString(FaceTemplate.template, Base64.DEFAULT);
 
         // Limpa a imagem
-        FSDK.FreeImage(imagem);
+        //FSDK.FreeImage(imagem);
 
         return ok == FSDK.FSDKE_OK;
     }
@@ -380,10 +386,10 @@ class ProcessImageAndDrawResults extends View {
         FSDK.MatchFaces(FaceTemplateDetected, FaceTemplateRef, similarity);
 
         // Limpa a imagem
-        FSDK.FreeImage(imagem);
+        //FSDK.FreeImage(imagem);
 
         Log.d("MATCH_FACES_PARAM", String.valueOf(this.matchFacesParam));
-        
+
         // As faces são iguais?
         return similarity[0] > this.matchFacesParam ? true : false;
     }
