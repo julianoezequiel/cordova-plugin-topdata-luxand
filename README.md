@@ -68,5 +68,5 @@ Para limpar um rosto específico, utilize o método `clear`, passando o ID do ro
 ```js
 Luxand.clear(id,(r)=>{}, err=>{});
 ```
-## Autor
+## Desenvolvedores
 - [Vinicius Felipe](https://github.com/Vinicius-Felipe-T)
