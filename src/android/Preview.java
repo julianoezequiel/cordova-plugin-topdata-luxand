@@ -131,17 +131,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
         /**/
 
         // choose preview size closer to 640x480 for optimal performance
-        //List<Camera.Size> supportedSizes = parameters.getSupportedPreviewSizes();
+        /*List<Camera.Size> supportedSizes = parameters.getSupportedPreviewSizes();
 
         int height = 0;
         int width = 0;
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        height = displayMetrics.heightPixels;
-        width = displayMetrics.widthPixels;
-
-        /*for (Camera.Size s: supportedSizes) {
+        for (Camera.Size s: supportedSizes) {
             if ((width - 640)*(width - 640) + (height - 640)*(height - 640) >
                     (s.width - 640)*(s.width - 640) + (s.height - 640)*(s.height - 640)) {
                 width = s.width;
@@ -149,10 +144,20 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
             }
         }*/
 
+        int heightInvert = 0;
+        int widthInvert = 0;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        heightInvert = displayMetrics.widthPixels;
+        widthInvert = displayMetrics.heightPixels;
+
+
         //try to set preferred parameters
         try {
-            if (width*height > 0) {
-                parameters.setPreviewSize(width, height);
+            if (widthInvert * heightInvert > 0) {
+                parameters.setPreviewSize(widthInvert, heightInvert);
             }
             //parameters.setPreviewFrameRate(10);
             parameters.setSceneMode(Camera.Parameters.SCENE_MODE_PORTRAIT);

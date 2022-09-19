@@ -39,7 +39,7 @@ public class Luxand extends CordovaPlugin {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean execute(String action, JSONArray data, CallbackContext callbackContext) throws JSONException {
-        Log.i("com.luxand.dsi-------", action + ":" + data.toString());
+        Log.d("com.luxand.dsi-------", action + ":" + data.toString());
         this.callbackContext = callbackContext;
         this.reqArgs = data;
 
@@ -104,7 +104,7 @@ public class Luxand extends CordovaPlugin {
         dbName = reqArgs.getString(1);
         loginTryCount = reqArgs.getInt(2);
 
-        Log.i("com.luxand.dsi", licence);
+        Log.d("com.luxand.dsi", licence);
 
         int res = FSDK.ActivateLibrary(licence);
 
@@ -156,7 +156,7 @@ public class Luxand extends CordovaPlugin {
         FSDK.HTracker tracker = new FSDK.HTracker();
         String templatePath = this.cordova.getActivity().getApplicationInfo().dataDir + "/" + dbName;
 
-        Log.i("com.luxand.dsi", "DBName" + dbName);
+        Log.d("com.luxand.dsi", "DBName" + dbName);
 
         if (FSDK.FSDKE_OK != FSDK.LoadTrackerMemoryFromFile(tracker, templatePath)) {
             Log.e("com.luxand.dsi", "Tracker not loaded from memory");
@@ -167,11 +167,11 @@ public class Luxand extends CordovaPlugin {
                 Log.e("com.luxand.dsi", "Tracker not loaded created");
                 return false;
             } else {
-                Log.i("com.luxand.dsi", "Tracker created");
+                Log.d("com.luxand.dsi", "Tracker created");
             }
-            
+
         } else {
-            Log.i("com.luxand.dsi", "Tracker loaded from memory");
+            Log.d("com.luxand.dsi", "Tracker loaded from memory");
         }
 
         int ok = FSDK.ClearTracker(tracker);
@@ -232,15 +232,15 @@ public class Luxand extends CordovaPlugin {
             intent.putExtra("MATCH_FACES_PARAM", matchFacesParam);
         }
 
-        Log.i("com.luxand.dsi::", "" + intent.getExtras());
+        Log.d("com.luxand.dsi::", "" + intent.getExtras());
         cordova.startActivityForResult(this, intent, REQUEST_CODE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (data == null) return;
-        CallbackContext callback = this.callbackContext;
-        Log.i("com.luxand.dsi::", requestCode + ":" + resultCode);
+        //CallbackContext callback = this.callbackContext;
+        Log.d("com.luxand.dsi::", requestCode + ":" + resultCode);
         if (requestCode == COMPARE_CODE) {
             if (resultCode == Activity.RESULT_OK && data.hasExtra("data")) {
                 //JSONObject res = new JSONObject();
@@ -249,22 +249,22 @@ public class Luxand extends CordovaPlugin {
                     //boolean error = data.getBooleanExtra("error", true);
                     boolean error = resData.getBoolean("error");
                     resData.put("status", error ? "FAIL" : "SUCCESS");
-                    Log.i("com.luxand.dsi::", "" + resData);
+                    Log.d("com.luxand.dsi::", "" + resData);
                     PluginResult result = new PluginResult(PluginResult.Status.OK, resData);
 
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    callbackContext.sendPluginResult(result);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                     PluginResult result = new PluginResult(PluginResult.Status.ERROR);
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    callbackContext.sendPluginResult(result);
                 }
             } else {
                 PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Unable to identify user");
                 result.setKeepCallback(true);
-                callback.sendPluginResult(result);
+                callbackContext.sendPluginResult(result);
             }
         } else if (requestCode == REGISTER_CODE) {
             if (resultCode == Activity.RESULT_OK && data.hasExtra("data")) {
@@ -273,22 +273,22 @@ public class Luxand extends CordovaPlugin {
                     //boolean error = data.getBooleanExtra("error", true);
                     boolean error = resData.getBoolean("error");
                     resData.put("status", error ? "FAIL" : "SUCCESS");
-                    Log.i("com.luxand.dsi::", "" + resData);
+                    Log.d("com.luxand.dsi::", "" + resData);
                     PluginResult result = new PluginResult(PluginResult.Status.OK, resData);
 
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    callbackContext.sendPluginResult(result);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                     PluginResult result = new PluginResult(PluginResult.Status.ERROR);
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    callbackContext.sendPluginResult(result);
                 }
             } else {
                 PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Unable to identify user");
                 result.setKeepCallback(true);
-                callback.sendPluginResult(result);
+                callbackContext.sendPluginResult(result);
             }
         }
     }
