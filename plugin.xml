@@ -33,10 +33,10 @@
         <resource-file src="arm64-v8a-libfsdk.so" target="jniLibs/arm64-v8a/libfsdk.so" />
         <resource-file src="src/android/layout/bottom_menu.xml" target="res/layout/bottom_menu.xml" />
         <resource-file src="src/android/layout/main.xml" target="res/layout/main.xml" />
-        
-        <resource-file src="src/android/frames/frame_branco.png" target="res/drawable-xxxhdpi/frame_branco.png" />
-        <resource-file src="src/android/frames/frame_amarelo.png" target="res/drawable-xxxhdpi/frame_amarelo.png" />
-        <resource-file src="src/android/frames/frame_verde.png" target="res/drawable-xxxhdpi/frame_verde.png" />
+
+        <resource-file src="src/android/frames/frame_branco.png" target="res/drawable-port-xxxhdpi/frame_branco.png" />
+        <resource-file src="src/android/frames/frame_amarelo.png" target="res/drawable-port-xxxhdpi/frame_amarelo.png" />
+        <resource-file src="src/android/frames/frame_verde.png" target="res/drawable-port-xxxhdpi/frame_verde.png" />
         <!-- <resource-file src="src/android/values/colors.xml" target="res/values/colors.xml" />
         <resource-file src="src/android/values/strings.xml" target="res/values/strings.xml" />
         <resource-file src="src/android/values/styles.xml" target="res/values/styles.xml" /> -->
