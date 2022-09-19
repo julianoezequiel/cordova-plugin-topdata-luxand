@@ -9,6 +9,7 @@ Este plugin suporta as seguintes plataformas:
 
 ## Instalação
 
+'npm install https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand.git'
 `ionic cordova plugin add https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand.git`
 
 ## Uso
