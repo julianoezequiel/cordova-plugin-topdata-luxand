@@ -97,6 +97,8 @@ class ProcessImageAndDrawResults extends View {
     @Override
     protected void onDraw(Canvas canvas) {
 
+        Log.e("PROGRESS", "INIT");
+
         if (this.startTime <= 0) {
             this.startTime = System.currentTimeMillis();
 
@@ -109,16 +111,24 @@ class ProcessImageAndDrawResults extends View {
             mMainActivity.updateImageView(R.drawable.frame_branco);
         }
 
+        Log.e("PROGRESS", "1");
+
         if (mYUVData == null || mTouchedIndex != -1) {
             super.onDraw(canvas);
             return; //nothing to process or name is being entered now
         }
 
+        Log.e("PROGRESS", "2");
+
         int canvasWidth = getWidth();
         //int canvasHeight = canvas.getHeight();
 
+        Log.e("PROGRESS", "2.1");
+
         // Convert from YUV to RGB
         decodeYUV420SP(mRGBData, mYUVData, mImageWidth, mImageHeight);
+
+        Log.e("PROGRESS", "3");
 
         // Load image to FaceSDK
         FSDK.HImage Image = new FSDK.HImage();
@@ -128,6 +138,8 @@ class ProcessImageAndDrawResults extends View {
         FSDK.MirrorImage(Image, false);
         FSDK.HImage RotatedImage = new FSDK.HImage();
         FSDK.CreateEmptyImage(RotatedImage);
+
+        Log.e("PROGRESS", "4");
 
         //it is necessary to work with local variables (onDraw called not the time when mImageWidth,
         // being reassigned, so swapping mImageWidth and mImageHeight may be not safe)
@@ -142,12 +154,17 @@ class ProcessImageAndDrawResults extends View {
             FSDK.CopyImage(Image, RotatedImage);
         }
 
+        Log.e("PROGRESS", "5");
+
         FSDK.FreeImage(Image);
+
+        Log.e("PROGRESS", "6");
 
         long[] IDs = new long[MAX_FACES];
         long[] face_count = new long[1];
 
-        FSDK.FeedFrame(mTracker, 0, RotatedImage, face_count, IDs);
+        int resp = FSDK.FeedFrame(mTracker, 0, RotatedImage, face_count, IDs);
+        Log.e("PROGRESS",  "7 - FEED FRAME: " + resp);
 
         faceLock.lock();
 
@@ -157,7 +174,7 @@ class ProcessImageAndDrawResults extends View {
 
             // Timeout exception
             mStopping = 1;
-            
+
             /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
             new Handler().postDelayed(new Runnable() {
                 public void run() {*/
@@ -172,7 +189,7 @@ class ProcessImageAndDrawResults extends View {
             mStopped = 1;
             super.onDraw(canvas);
             return;
-        } else {
+        } //else {
 
             for (int i = 0; i < MAX_FACES; ++i) {
                 mFacePositions[i] = new FaceRectangle();
@@ -186,10 +203,14 @@ class ProcessImageAndDrawResults extends View {
                     mMainActivity.updateTextView(Constants.ENQUADRE_ROSTO);
             }
 
+            Log.e("PROGRESS", "8");
+
             if (face_count[0] <= 0) {
                 FSDK.FreeImage(RotatedImage);
                 return;
             }
+
+            Log.e("PROGRESS", "9");
 
             float ratio = (canvasWidth * 1.0f) / ImageWidth;
 
@@ -208,6 +229,10 @@ class ProcessImageAndDrawResults extends View {
             faceLock.unlock();
 
             // A FACE ESTÁ ENQUADRADA NO FRAME && EXISTE APENAS UMA FACE DETECTADA
+
+            Log.e("FACE_COUNT", String.valueOf(face_count[0]));
+            Log.e("FACE_ENQUADRADA", String.valueOf(faceEnquadrada()));
+
             if (faceEnquadrada() && face_count[0] == 1 && mStopping == 0) {
 
                 mMainActivity.updateImageView(R.drawable.frame_amarelo);
@@ -296,7 +321,7 @@ class ProcessImageAndDrawResults extends View {
                                 } else if (r == ALREADY_REGISTERED) {
                                     FSDK.FreeImage(RotatedImage);
                                     mStopping = 1;
-                                    
+
                                     /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
                                     new Handler().postDelayed(new Runnable() {
                                         public void run() {*/
@@ -315,7 +340,7 @@ class ProcessImageAndDrawResults extends View {
                                     remove(IDs[0]);
 
                                     mStopping = 1;
-                                    
+
                                     /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
                                     new Handler().postDelayed(new Runnable() {
                                         public void run() {*/
@@ -334,7 +359,7 @@ class ProcessImageAndDrawResults extends View {
                                 if (!ok) {
                                     FSDK.FreeImage(RotatedImage);
                                     mStopping = 1;
-                                    
+
                                     /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
                                     new Handler().postDelayed(new Runnable() {
                                         public void run() {*/
@@ -367,6 +392,7 @@ class ProcessImageAndDrawResults extends View {
                 } else {
                     Log.d("LIVENESS", "Não está vivo " + liveness[0]);
                     FSDK.FreeImage(RotatedImage);
+                    return;
                 }
             } else {
                 FSDK.FreeImage(RotatedImage);
@@ -374,9 +400,11 @@ class ProcessImageAndDrawResults extends View {
                     mMainActivity.updateTextView(Constants.ENQUADRE_ROSTO);
                     mMainActivity.updateImageView(R.drawable.frame_branco);
                 }
-            }
-        }
 
+                return;
+            }
+
+        Log.e("PROGRESS", "Final");
         super.onDraw(canvas);
     } // end onDraw method
 

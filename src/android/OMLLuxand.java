@@ -29,10 +29,15 @@ import com.topdata.apptopponto.R;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class OMLLuxand extends Activity implements OnClickListener {
+
+    private boolean mIsFailed = false;
+    private Preview mPreview;
 
     private ProcessImageAndDrawResults mDraw;
 
@@ -80,7 +85,7 @@ public class OMLLuxand extends Activity implements OnClickListener {
         mDraw.setOnImageProcessListener(new OnImageProcessListener() {
             @Override
             public void handle(JSONObject obj) {
-                handlerDateTime.removeCallbacksAndMessages(null);
+                //handlerDateTime.removeCallbacksAndMessages(null);
 
                 Intent data = new Intent();
 
@@ -94,7 +99,7 @@ public class OMLLuxand extends Activity implements OnClickListener {
             }
         });
 
-        Preview mPreview = new Preview(this, mDraw);
+        mPreview = new Preview(this, mDraw);
         mDraw.mTracker = new FSDK.HTracker();
 
         String templatePath = this.getApplicationInfo().dataDir + "/" + database;
@@ -142,9 +147,9 @@ public class OMLLuxand extends Activity implements OnClickListener {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-                LocalDateTime dateTime = LocalDateTime.now();
-                String dateTimeString = dateTime.format(formatter);
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                Date dateTime = new Date();
+                String dateTimeString = formatter.format(dateTime);
 
                 TextView dateTimeText = findViewById(R.id.dateTimeText);
                 dateTimeText.setText(dateTimeString);
@@ -207,7 +212,7 @@ public class OMLLuxand extends Activity implements OnClickListener {
                 "DetectLiveness=true;" + // enable liveness
                         "SmoothAttributeLiveness=true;" + // use smooth minimum function for liveness values
                         "AttributeLivenessSmoothingAlpha=1;" + // smooth minimum parameter, 0 -> mean, inf -> min
-                        "LivenessFramesCount=10;", errpos); // minimal number of frames required to output liveness attribute
+                        "LivenessFramesCount=5;", errpos); // minimal number of frames required to output liveness attribute
 
         if (errpos[0] != FSDK.FSDKE_OK) {
             showErrorAndClose("Error setting tracker parameters 1, position", errpos[0]);
@@ -315,11 +320,15 @@ public class OMLLuxand extends Activity implements OnClickListener {
 
     private void _pause() {
         pauseProcessingFrames();
+        String templatePath = this.getApplicationInfo().dataDir + "/" + database;
+        FSDK.SaveTrackerMemoryToFile(mDraw.mTracker, templatePath);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (mIsFailed)
+            return;
         resumeProcessingFrames();
     }
 

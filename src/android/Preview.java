@@ -132,13 +132,11 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
         // choose preview size closer to 640x480 for optimal performance
         /*List<Camera.Size> supportedSizes = parameters.getSupportedPreviewSizes();
-
-        int height = 0;
         int width = 0;
-
+        int height = 0;
         for (Camera.Size s: supportedSizes) {
-            if ((width - 640)*(width - 640) + (height - 640)*(height - 640) >
-                    (s.width - 640)*(s.width - 640) + (s.height - 640)*(s.height - 640)) {
+            if ((width - 640)*(width - 640) + (height - 480)*(height - 480) >
+                    (s.width - 640)*(s.width - 640) + (s.height - 480)*(s.height - 480)) {
                 width = s.width;
                 height = s.height;
             }
@@ -153,10 +151,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
         heightInvert = displayMetrics.widthPixels;
         widthInvert = displayMetrics.heightPixels;
 
-
         //try to set preferred parameters
         try {
-            if (widthInvert * heightInvert > 0) {
+            if (widthInvert*heightInvert > 0) {
                 parameters.setPreviewSize(widthInvert, heightInvert);
             }
             //parameters.setPreviewFrameRate(10);
