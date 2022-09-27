@@ -12,7 +12,7 @@ Este plugin suporta as seguintes plataformas:
 `npm install https://github.com/topdatadev/cordova-plugin-topdata-luxand.git`
 <br/>
 <br/>
-`ionic cordova plugin add https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand.git`
+`ionic cordova plugin add https://github.com/topdatadev/cordova-plugin-topdata-luxand.git`
 
 ## Uso
 Antes de usar o plugin, você deve iniciá-lo com sua chave de licença da luxand, chamando o método `init`:
