@@ -37,39 +37,30 @@ typedef struct {
 @interface RecognitionViewController : UIViewController <RecognitionCameraDelegate>
 {
 	RecognitionCamera * camera;
-    LuxandProcessor* luxandProcessor;
 	UIScreen * screenForDisplay;
-    
-    GLuint directDisplayProgram;
-	GLuint videoFrameTexture;
-	GLubyte * rawPositionPixels;
+    LuxandProcessor* luxandProcessor;
 
-    NSLock * enteredNameLock;
-    char * enteredName;
-    NSString* correspondingName;
-    NSString* generatedName;
-    long correspondingId;
-    volatile int namedFaceID;
-    BOOL identifying;
+    BOOL isRegister;
     BOOL identified;
     long tryCount;
     long initialTryCount;
     long long startTime;
+    
+    GLuint directDisplayProgram;
+    GLuint videoFrameTexture;
+    GLubyte * rawPositionPixels;
+    
+    NSString * templateResponse;
+    NSString * templateRef;
+
     CALayer * trackingRects[MAX_FACES];
     CATextLayer * nameLabels[MAX_FACES];
     
-    //volatile int processingImage;
-    
     NSLock * faceDataLock;
     FaceRectangle faces[MAX_FACES];
-    NSLock * nameDataLock;
-    char * names[MAX_FACES];
-    NSString* mAttributeValues[MAX_FACES];
+    
     long long IDs[MAX_FACES];
-    volatile int faceTouched;
-    volatile int indexOfTouchedFace;
-    NSLock * idOfTouchedFaceLock;
-    long long idOfTouchedFace;
+
     CGPoint currentTouchPoint;
 	
     volatile int rotating;
@@ -77,25 +68,22 @@ typedef struct {
     
     volatile int clearTracker;
     UIToolbar * toolbar;
-    
-    //UIImage * image_for_screenshot;
-    
-    //NOTE: use locks accessing (volatile int) variables if int is not machine word 
 }
 
 @property(readonly) RecognitionGLView * glView;
 @property(readonly) HTracker tracker;
-@property(readwrite) NSString * templatePath;
+@property(readwrite) NSString *  templatePath;
+@property(readwrite) NSString *  templateInit;
 @property(readwrite) volatile int closing;
 @property(readonly) volatile int processingImage;
 
 // Initialization and teardown
 - (id)initWithProcessor:(UIScreen *)newScreenForDisplay processor:(LuxandProcessor*) processor;
--(NSString*) generateName;
--(NSString*) performRegistrationAgain: (long) id;
--(int)register: (long) id;
--(void) response: (BOOL) error message:(NSString*) message extra:(NSString*) extra;
--(bool) recognize: (long) id ;
+
+-(bool) compararTemplates: (HImage) imagemRef;
+-(bool) getTemplate: (HImage) imagemRef;
+-(void) response: (BOOL) error message:(NSString*) message;
+
 // OpenGL ES 2.0 setup methods
 - (BOOL)loadVertexShader:(NSString *)vertexShaderName fragmentShader:(NSString *)fragmentShaderName forProgram:(GLuint *)programPointer;
 - (BOOL)compileShader:(GLuint *)shader type:(GLenum)type file:(NSString *)file;

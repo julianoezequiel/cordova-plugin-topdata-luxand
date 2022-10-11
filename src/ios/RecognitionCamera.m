@@ -21,19 +21,25 @@
 	
 	// Grab the front-facing camera
 	AVCaptureDevice * camera = nil;
-	NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-	for (AVCaptureDevice *device in devices) {
-		if ([device position] == AVCaptureDevicePositionFront) {
-			camera = device;
-		}
-	}
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    
+    /*AVCaptureDeviceDiscoverySession *captureDeviceDiscoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera]
+                                          mediaType:AVMediaTypeVideo
+                                           position:AVCaptureDevicePositionFront];
+    NSArray *devices = [captureDeviceDiscoverySession devices];*/
+    
+    for (AVCaptureDevice *device in devices) {
+        if ([device position] == AVCaptureDevicePositionFront) {
+            camera = device;
+        }
+    }
 	
 	// Create the capture session
 	captureSession = [[AVCaptureSession alloc] init];
 	
 	// Add the video input	
 	NSError *error = nil;
-	videoInput = [AVCaptureDeviceInput deviceInputWithDevice:camera error:&error];
+    videoInput = [[AVCaptureDeviceInput alloc] initWithDevice:camera error:&error];
 	if ([captureSession canAddInput:videoInput]) {
 		[captureSession addInput:videoInput];
 	}

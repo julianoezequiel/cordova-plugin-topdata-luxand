@@ -19,6 +19,10 @@
 @synthesize dbName = _dbName;
 @synthesize tryCount = _tryCount;
 @synthesize templatePath = _templatePath;
+@synthesize window = _window;
+@synthesize templateInit = _templateInit;
+@synthesize livenessParam = _livenessParam;
+@synthesize matchFacesParam = _matchFacesParam;
 
 //@synthesize processor = _processor;
 -(BOOL)notHasPermission
@@ -43,11 +47,14 @@
     _licence = [command.arguments objectAtIndex:0];
     _dbName = [command.arguments objectAtIndex:1];
     _tryCount = [command.arguments[2] integerValue];
+    
     NSString * templatePathO = [NSHomeDirectory() stringByAppendingPathComponent:[@"Documents/" stringByAppendingString: _dbName]];
     const char * templatePath = [templatePathO UTF8String];
     _templatePath = (char *)malloc(strlen(templatePath)+1);
     strcpy(_templatePath, templatePath);
+    
     NSLog(@"Plugin args %s %s %ld\n", [_licence UTF8String], _templatePath, _tryCount);
+    
     int res = FSDKE_OK;
     res = FSDK_ActivateLibrary([_licence UTF8String]);
     #if defined(DEBUG)
@@ -81,22 +88,46 @@
 - (void)register: (CDVInvokedUrlCommand*)command;
 {
     long timeout = [command.arguments[0] integerValue];
-    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount identifying: true templatePath: [NSString stringWithUTF8String: self.templatePath]];
+    
+    _templateInit = [command.arguments objectAtIndex:1];
+    NSLog(@"com.luxand: TEMPLATE_INIT %@", _templateInit);
+    
+    _livenessParam = * new float([command.arguments[2] floatValue]);
+    NSLog(@"com.luxand: LIVENESS_PARAM %f", _livenessParam);
+    
+    _matchFacesParam = * new float([command.arguments[3] floatValue]);
+    //NSLog(@"com.luxand: MATCH_FACES_PARAM %f", _matchFacesParam);
+    
+    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount isRegister: true templatePath: [NSString stringWithUTF8String: self.templatePath] window: self.window templateInit: self.templateInit livenessParam: self.livenessParam matchFacesParam: self.matchFacesParam];
+
     //laucn with
     [_processor performSelector:@selector(register) withObject:nil afterDelay:0];
 }
-- (void)login: (CDVInvokedUrlCommand*)command;
+
+- (void)compare: (CDVInvokedUrlCommand*)command;
 {
     long timeout = [command.arguments[0] integerValue];
-    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount identifying: false templatePath: [NSString stringWithUTF8String: self.templatePath]];
+    
+    _templateInit = [command.arguments objectAtIndex:1];
+    NSLog(@"com.luxand: TEMPLATE_INIT %@", _templateInit);
+    
+    _livenessParam = * new float([command.arguments[2] floatValue]);
+    NSLog(@"com.luxand: LIVENESS_PARAM %f", _livenessParam);
+    
+    _matchFacesParam = * new float([command.arguments[3] floatValue]);
+    NSLog(@"com.luxand: MATCH_FACES_PARAM %f", _matchFacesParam);
+    
+    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount isRegister: false templatePath: [NSString stringWithUTF8String: self.templatePath] window: self.window templateInit: self.templateInit livenessParam: self.livenessParam matchFacesParam: self.matchFacesParam];
     //laucn with
-    [_processor performSelector:@selector(login) withObject:nil afterDelay:0];
+    [_processor performSelector:@selector(compare) withObject:nil afterDelay:0];
 }
+
 -(void) clear:(CDVInvokedUrlCommand *)command {
     NSDictionary* ret = [[NSDictionary alloc] initWithObjectsAndKeys:@"FAIL", @"status", nil];
     [self sendError:ret commandId:command.callbackId];
     return;
 }
+
 -(void) clearMemory:(CDVInvokedUrlCommand *)command {
     HTracker tracker;
     if(FSDKE_OK != FSDK_LoadTrackerMemoryFromFile(&tracker, _templatePath))
@@ -119,6 +150,7 @@
                                resultWithStatus: CDVCommandStatus_OK
                                messageAsDictionary: data
                                ];
+
     [self.commandDelegate sendPluginResult:result callbackId: callbackId];
 }
 -(void) sendError:(NSDictionary*)data commandId:(NSString*) callbackId {
@@ -133,35 +165,46 @@
 
 @implementation LuxandProcessor
 
-- (id)initWithPlugin:(Luxand*)plugin callback:(NSString*)callback parentViewController: (UIViewController*) parentViewController licence : (NSString*) licence timeout: (long) timeout retryCount: (long) retry identifying:(BOOL) forIdenftifying templatePath: (NSString*) dbPath
+- (id)initWithPlugin:(Luxand*)plugin callback:(NSString*)callback parentViewController: (UIViewController*) parentViewController licence : (NSString*) licence timeout: (long) timeout retryCount: (long) retry isRegister:(BOOL) forRegister templatePath: (NSString*) dbPath window: (UIWindow*) uiWindow templateInit:(NSString *)templateInit livenessParam:(float) livenessParam matchFacesParam:(float) matchFacesParam
 {
     self.templatePath = dbPath;
+    self.templateInit = templateInit;
     self.plugin = plugin;
     self.licence = licence;
     self.tryCount = retry;
-    self.identifying = forIdenftifying;
+    self.isRegister = forRegister;
     self.timeout = timeout;
     self.callback = callback;
     self.parentViewController = parentViewController;
+    self.window = uiWindow;
+    self.livenessParam = livenessParam;
+    self.matchFacesParam = matchFacesParam;
+    
     return self;
 }
 - (void)dealloc {
     self.plugin = nil;
     self.callback = nil;
     self.parentViewController = nil;
-    self.parentViewController = nil;
+    self.window = nil;
+    //self.parentViewController = nil;
 }
 - (void) register{
     viewController = [[RecognitionViewController alloc] initWithProcessor: [UIScreen mainScreen] processor:self];
     [self.parentViewController presentViewController: viewController animated: false completion:nil];
 }
-- (void) login{
+- (void) compare{
     viewController = [[RecognitionViewController alloc] initWithProcessor: [UIScreen mainScreen] processor:self];
     [self.parentViewController presentViewController: viewController animated: false completion:nil];
 }
 -(void) sendResult: (NSDictionary*) data {
     [self.plugin sendSuccess:data commandId: self.callback];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self -> viewController dismissViewControllerAnimated:TRUE completion: Nil];
+    });
+    
     //quit app
-    [viewController dismissViewControllerAnimated:YES completion:Nil];
+    //[viewController dismissViewControllerAnimated:YES completion:Nil];
 }
 @end
