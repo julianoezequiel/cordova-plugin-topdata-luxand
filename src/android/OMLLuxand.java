@@ -134,6 +134,7 @@ public class OMLLuxand extends Activity implements OnClickListener {
     public void updateTextView(final String texto) {
         TextView textInfo = findViewById(R.id.textInfo);
         textInfo.setText(texto);
+        textInfo.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
     }
 
     /**

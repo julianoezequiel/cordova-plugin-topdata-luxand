@@ -238,8 +238,8 @@ public class Luxand extends CordovaPlugin {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (data == null) return;
-        //CallbackContext callback = this.callbackContext;
+        if (data == null || this.callbackContext == null) return;
+        CallbackContext callback = this.callbackContext;
         Log.d("com.luxand.dsi::", requestCode + ":" + resultCode);
         if (requestCode == COMPARE_CODE) {
             if (resultCode == Activity.RESULT_OK && data.hasExtra("data")) {
@@ -253,18 +253,18 @@ public class Luxand extends CordovaPlugin {
                     PluginResult result = new PluginResult(PluginResult.Status.OK, resData);
 
                     result.setKeepCallback(true);
-                    callbackContext.sendPluginResult(result);
+                    callback.sendPluginResult(result);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                     PluginResult result = new PluginResult(PluginResult.Status.ERROR);
                     result.setKeepCallback(true);
-                    callbackContext.sendPluginResult(result);
+                    callback.sendPluginResult(result);
                 }
             } else {
                 PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Unable to identify user");
                 result.setKeepCallback(true);
-                callbackContext.sendPluginResult(result);
+                callback.sendPluginResult(result);
             }
         } else if (requestCode == REGISTER_CODE) {
             if (resultCode == Activity.RESULT_OK && data.hasExtra("data")) {
@@ -277,18 +277,18 @@ public class Luxand extends CordovaPlugin {
                     PluginResult result = new PluginResult(PluginResult.Status.OK, resData);
 
                     result.setKeepCallback(true);
-                    callbackContext.sendPluginResult(result);
+                    callback.sendPluginResult(result);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                     PluginResult result = new PluginResult(PluginResult.Status.ERROR);
                     result.setKeepCallback(true);
-                    callbackContext.sendPluginResult(result);
+                    callback.sendPluginResult(result);
                 }
             } else {
                 PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Unable to identify user");
                 result.setKeepCallback(true);
-                callbackContext.sendPluginResult(result);
+                callback.sendPluginResult(result);
             }
         }
     }

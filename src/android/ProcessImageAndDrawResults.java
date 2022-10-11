@@ -26,14 +26,12 @@ class ProcessImageAndDrawResults extends View {
     private OnImageProcessListener onImageProcessListener;
 
     final int MAX_FACES = 1;
-    int mTouchedIndex;
     int mStopping;
     int mStopped;
     private int registerCheckCount = 0;
     private int loginCount = 0;
     private final int loginTryCount;
     private final int timeOut;
-    private long correspondingId;
     private long startTime = 0;
 
     final FaceRectangle[] mFacePositions = new FaceRectangle[MAX_FACES];
@@ -48,8 +46,6 @@ class ProcessImageAndDrawResults extends View {
     boolean rotated;
     boolean isRegister;
 
-    private String generatedName;
-    private String name;
     private String template = "";
     private final float livenessParam;
     private final float matchFacesParam;
@@ -82,7 +78,6 @@ class ProcessImageAndDrawResults extends View {
 
         this.isRegister = isRegister;
         this.loginTryCount = loginTryCount;
-        mTouchedIndex = -1;
 
         mStopping = 0;
         mStopped = 0;
@@ -97,8 +92,6 @@ class ProcessImageAndDrawResults extends View {
     @Override
     protected void onDraw(Canvas canvas) {
 
-        Log.e("PROGRESS", "INIT");
-
         if (this.startTime <= 0) {
             this.startTime = System.currentTimeMillis();
 
@@ -111,24 +104,16 @@ class ProcessImageAndDrawResults extends View {
             mMainActivity.updateImageView(R.drawable.frame_branco);
         }
 
-        Log.e("PROGRESS", "1");
-
-        if (mYUVData == null || mTouchedIndex != -1) {
+        if (mYUVData == null) {
             super.onDraw(canvas);
             return; //nothing to process or name is being entered now
         }
 
-        Log.e("PROGRESS", "2");
-
         int canvasWidth = getWidth();
         //int canvasHeight = canvas.getHeight();
 
-        Log.e("PROGRESS", "2.1");
-
         // Convert from YUV to RGB
         decodeYUV420SP(mRGBData, mYUVData, mImageWidth, mImageHeight);
-
-        Log.e("PROGRESS", "3");
 
         // Load image to FaceSDK
         FSDK.HImage Image = new FSDK.HImage();
@@ -138,8 +123,6 @@ class ProcessImageAndDrawResults extends View {
         FSDK.MirrorImage(Image, false);
         FSDK.HImage RotatedImage = new FSDK.HImage();
         FSDK.CreateEmptyImage(RotatedImage);
-
-        Log.e("PROGRESS", "4");
 
         //it is necessary to work with local variables (onDraw called not the time when mImageWidth,
         // being reassigned, so swapping mImageWidth and mImageHeight may be not safe)
@@ -154,22 +137,17 @@ class ProcessImageAndDrawResults extends View {
             FSDK.CopyImage(Image, RotatedImage);
         }
 
-        Log.e("PROGRESS", "5");
-
         FSDK.FreeImage(Image);
-
-        Log.e("PROGRESS", "6");
 
         long[] IDs = new long[MAX_FACES];
         long[] face_count = new long[1];
 
         int resp = FSDK.FeedFrame(mTracker, 0, RotatedImage, face_count, IDs);
-        Log.e("PROGRESS",  "7 - FEED FRAME: " + resp);
 
         faceLock.lock();
 
         if (timeOut != -1 && System.currentTimeMillis() - this.startTime > timeOut && mStopping == 0) {
-            Log.e("com.luxand.dsi:", "TIME OUT");
+
             FSDK.FreeImage(RotatedImage);
 
             // Timeout exception
@@ -178,6 +156,7 @@ class ProcessImageAndDrawResults extends View {
             /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
             new Handler().postDelayed(new Runnable() {
                 public void run() {*/
+            Log.e("com.luxand", "TIME OUT");
             response(true, "DETECTION_TIMEOUT", "");
             return;
                 /*}
@@ -191,220 +170,173 @@ class ProcessImageAndDrawResults extends View {
             return;
         } //else {
 
-            for (int i = 0; i < MAX_FACES; ++i) {
-                mFacePositions[i] = new FaceRectangle();
-                mFacePositions[i].x1 = 0;
-                mFacePositions[i].y1 = 0;
-                mFacePositions[i].x2 = 0;
-                mFacePositions[i].y2 = 0;
-                mIDs[i] = IDs[i];
+        for (int i = 0; i < MAX_FACES; ++i) {
+            mFacePositions[i] = new FaceRectangle();
+            mFacePositions[i].x1 = 0;
+            mFacePositions[i].y1 = 0;
+            mFacePositions[i].x2 = 0;
+            mFacePositions[i].y2 = 0;
+            mIDs[i] = IDs[i];
 
-                if (mStopping == 0)
-                    mMainActivity.updateTextView(Constants.ENQUADRE_ROSTO);
+            if (mStopping == 0)
+                mMainActivity.updateTextView(Constants.ENQUADRE_ROSTO);
+        }
+
+        if (face_count[0] <= 0) {
+            FSDK.FreeImage(RotatedImage);
+            return;
+        }
+
+        float ratio = (canvasWidth * 1.0f) / ImageWidth;
+
+        for (int i = 0; i < (int) face_count[0]; ++i) {
+            // OLHOS
+            FSDK.FSDK_Features Eyes = new FSDK.FSDK_Features();
+            FSDK.GetTrackerEyes(mTracker, 0, mIDs[i], Eyes);
+
+            GetFaceFrame(Eyes, mFacePositions[i]);
+            mFacePositions[i].x1 *= ratio;
+            mFacePositions[i].y1 *= ratio;
+            mFacePositions[i].x2 *= ratio;
+            mFacePositions[i].y2 *= ratio;
+        }
+
+        faceLock.unlock();
+
+        // A FACE ESTÁ ENQUADRADA NO FRAME && EXISTE APENAS UMA FACE DETECTADA
+        Log.e("com.luxand", "FACE_COUNT - " + face_count[0]);
+        Log.e("com.luxand", "FACE_ENQUADRADA - " + faceEnquadrada());
+
+        if (faceEnquadrada() && face_count[0] == 1 && mStopping == 0) {
+
+            mMainActivity.updateImageView(R.drawable.frame_amarelo);
+
+            String[] value = new String[1];
+            liveness = new float[1];
+
+            int res = FSDK.GetTrackerFacialAttribute(mTracker, 0, IDs[0], "Liveness", value, 1024);
+            if (res == FSDK.FSDKE_OK) {
+                FSDK.GetValueConfidence(value[0], "Liveness", liveness);
             }
 
-            Log.e("PROGRESS", "8");
+            float livenessMaior = 0f;
 
-            if (face_count[0] <= 0) {
-                FSDK.FreeImage(RotatedImage);
-                return;
-            }
+            livenessMaior = Math.max(liveness[0], livenessMaior);
+            Log.d("com.luxand", "LIVENESS_MAIOR - " + livenessMaior);
+            Log.d("com.luxand", "LIVENESS_PARAM - " + this.livenessParam);
 
-            Log.e("PROGRESS", "9");
+            if (liveness[0] > this.livenessParam) {
+                Log.d("com.luxand", "LIVE");
 
-            float ratio = (canvasWidth * 1.0f) / ImageWidth;
+                if (!this.isRegister) {
+                    // COMPARAR FACES
+                    boolean identified = false;
+                    if (face_count[0] > 1) {
+                        if (loginCount < loginTryCount) {
+                            Toast.makeText(getContext(), "Múltiplas faces detectada...", Toast.LENGTH_LONG).show();
+                            //return;
+                        }
+                    } else if (faceEnquadrada() && face_count[0] == 1) {
 
-            for (int i = 0; i < (int) face_count[0]; ++i) {
-                // OLHOS
-                FSDK.FSDK_Features Eyes = new FSDK.FSDK_Features();
-                FSDK.GetTrackerEyes(mTracker, 0, mIDs[i], Eyes);
+                        // Mark and name faces
+                        for (int i = 0; i < face_count[0]; ++i) {
+                            mMainActivity.updateImageView(R.drawable.frame_amarelo);
+                            identified = compararTemplates(RotatedImage);
+                            FSDK.FreeImage(RotatedImage);
+                        }
 
-                GetFaceFrame(Eyes, mFacePositions[i]);
-                mFacePositions[i].x1 *= ratio;
-                mFacePositions[i].y1 *= ratio;
-                mFacePositions[i].x2 *= ratio;
-                mFacePositions[i].y2 *= ratio;
-            }
+                        if (this.loginCount <= loginTryCount && identified) {
+                            mStopping = 1;
+                            mMainActivity.updateTextView(Constants.SUCESSO_RECONHECIMENTO);
+                            mMainActivity.updateImageView(R.drawable.frame_verde);
 
-            faceLock.unlock();
+                            new Handler().postDelayed(new Runnable() {
+                                public void run() {
+                                    Log.e("com.luxand", "FACE_EQUALS");
+                                    response(false, "FACE_EQUALS", template);
+                                    //return;
+                                }
+                            }, 1000);
+                        }
 
-            // A FACE ESTÁ ENQUADRADA NO FRAME && EXISTE APENAS UMA FACE DETECTADA
+                        this.loginCount++;
 
-            Log.e("FACE_COUNT", String.valueOf(face_count[0]));
-            Log.e("FACE_ENQUADRADA", String.valueOf(faceEnquadrada()));
+                        if (this.loginCount >= loginTryCount) {
 
-            if (faceEnquadrada() && face_count[0] == 1 && mStopping == 0) {
-
-                mMainActivity.updateImageView(R.drawable.frame_amarelo);
-
-                String[] value = new String[1];
-                liveness = new float[1];
-
-                int res = FSDK.GetTrackerFacialAttribute(mTracker, 0, IDs[0], "Liveness", value, 1024);
-                if (res == FSDK.FSDKE_OK) {
-                    FSDK.GetValueConfidence(value[0], "Liveness", liveness);
-                }
-
-                float livenessMaior = 0f;
-
-                livenessMaior = Math.max(liveness[0], livenessMaior);
-                Log.d("LIVENESS_MAIOR", String.valueOf(livenessMaior));
-                Log.d("LIVENESS_PARAM", String.valueOf(this.livenessParam));
-
-                if (liveness[0] > this.livenessParam) {
-                    Log.d("LIVENESS", "Está vivo");
-
-                    if (!this.isRegister) {
-                        // COMPARAR FACES
-                        boolean identified = false;
-                        if (face_count[0] > 1) {
-                            if (loginCount < loginTryCount) {
-                                Toast.makeText(getContext(), "Múltiplas faces detectada...", Toast.LENGTH_LONG).show();
-                                //return;
-                            }
-                        } else if (faceEnquadrada() && face_count[0] == 1) {
-
-                            // Mark and name faces
-                            for (int i = 0; i < face_count[0]; ++i) {
-                                mMainActivity.updateImageView(R.drawable.frame_amarelo);
-                                identified = identified || compararTemplates(RotatedImage);
-                                FSDK.FreeImage(RotatedImage);
-                            }
-
-                            if (this.loginCount <= loginTryCount && identified) {
-                                correspondingId = IDs[0];
-
-                                mStopping = 1;
-                                mMainActivity.updateTextView(Constants.SUCESSO_RECONHECIMENTO);
-                                mMainActivity.updateImageView(R.drawable.frame_verde);
-
-                                new Handler().postDelayed(new Runnable() {
-                                    public void run() {
-                                        response(false, "FACE_EQUALS", template);
-                                        //return;
-                                    }
-                                }, 1000);
-                            }
-
-                            this.loginCount++;
-
-                            if (this.loginCount >= loginTryCount) {
-
-                                mStopping = 1;
+                            mStopping = 1;
                                 /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
                                 new Handler().postDelayed(new Runnable() {
                                     public void run() {*/
-                                response(true, "FAIL_COMPARE", "");
-                                return;
+                            Log.e("com.luxand", "FAIL_COMPARE");
+                            response(true, "FAIL_COMPARE", "");
+                            return;
                                     /*}
                                 }, 4000);*/
-
-
-                            }
-                        }
-                    } else {
-                        // REGISTRAR FACE
-                        if (face_count[0] > 1) {
-                            if (registerCheckCount < loginTryCount) {
-                                Toast.makeText(getContext(), "Múltiplas faces detectada...", Toast.LENGTH_LONG).show();
-                                //return;
-                            }
-                        } else if (faceEnquadrada() && face_count[0] == 1) {
-                            if (registerCheckCount < 1) {
-                                mMainActivity.updateImageView(R.drawable.frame_amarelo);
-
-                                // Tenta realizar o cadastro da face
-                                int r = this.register(IDs[0], RotatedImage);
-
-                                if (r == REGISTERED) {
-                                    registerCheckCount = 1;
-                                } else if (r == ALREADY_REGISTERED) {
-                                    FSDK.FreeImage(RotatedImage);
-                                    mStopping = 1;
-
-                                    /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
-                                    new Handler().postDelayed(new Runnable() {
-                                        public void run() {*/
-                                    response(true, "ALREADY_REGISTERED", "");
-                                    return;
-                                        /*}
-                                    }, 4000);*/
-                                }
-                            } else {
-                                String name = this.performRegistrationAgain(IDs[0]);
-
-                                // Falha ao cadastrar/encontrar a face
-                                if (name == null || !name.equals(generatedName)) {
-                                    FSDK.FreeImage(RotatedImage);
-                                    //purge id
-                                    remove(IDs[0]);
-
-                                    mStopping = 1;
-
-                                    /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
-                                    new Handler().postDelayed(new Runnable() {
-                                        public void run() {*/
-                                    response(true, "FAIL_REGISTRATION", "");
-                                    return;
-                                        /*}
-                                    }, 4000);*/
-                                }
-
-                                registerCheckCount++;
-                                mMainActivity.updateImageView(R.drawable.frame_amarelo);
-
-                                // Face registrada
-                                boolean ok = getTemplate(RotatedImage);
-
-                                if (!ok) {
-                                    FSDK.FreeImage(RotatedImage);
-                                    mStopping = 1;
-
-                                    /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
-                                    new Handler().postDelayed(new Runnable() {
-                                        public void run() {*/
-                                    response(true, "ERROR_GET_TEMPLATE", "");
-                                    return;
-                                        /*}
-                                    }, 4000);*/
-                                }
-
-                                this.name = name;
-                                this.correspondingId = IDs[0];
-
-                                FSDK.FreeImage(RotatedImage);
-
-                                mStopping = 1;
-                                mMainActivity.updateTextView(Constants.SUCESSO_RECONHECIMENTO);
-
-                                mMainActivity.updateImageView(R.drawable.frame_verde);
-
-                                new Handler().postDelayed(new Runnable() {
-                                    public void run() {
-                                        response(false, "REGISTERED", template);
-                                        //return;
-                                    }
-                                }, 1000);
-                            }
                         }
                     }
-
                 } else {
-                    Log.d("LIVENESS", "Não está vivo " + liveness[0]);
-                    FSDK.FreeImage(RotatedImage);
-                    return;
-                }
-            } else {
-                FSDK.FreeImage(RotatedImage);
-                if (mStopping == 0) {
-                    mMainActivity.updateTextView(Constants.ENQUADRE_ROSTO);
-                    mMainActivity.updateImageView(R.drawable.frame_branco);
+                    // REGISTRAR FACE
+                    if (face_count[0] > 1) {
+                        if (registerCheckCount < loginTryCount) {
+                            Toast.makeText(getContext(), "Múltiplas faces detectada...", Toast.LENGTH_LONG).show();
+                            //return;
+                        }
+                    } else if (faceEnquadrada() && face_count[0] == 1) {
+
+                        registerCheckCount++;
+                        mMainActivity.updateImageView(R.drawable.frame_amarelo);
+
+                        // Face registrada
+                        boolean ok = getTemplate(RotatedImage);
+
+                        if (!ok) {
+                            FSDK.FreeImage(RotatedImage);
+                            mStopping = 1;
+
+                                    /*mMainActivity.updateTextView("LIVENESS: " + this.liveness[0] + " \nMATCH_FACES: " + this.similarity[0]);
+                                    new Handler().postDelayed(new Runnable() {
+                                        public void run() {*/
+                            Log.e("com.luxand", "ERROR_GET_TEMPLATE");
+                            response(true, "ERROR_GET_TEMPLATE", "");
+                            return;
+                                        /*}
+                                    }, 4000);*/
+                        }
+
+                        FSDK.FreeImage(RotatedImage);
+
+                        mStopping = 1;
+                        mMainActivity.updateTextView(Constants.SUCESSO_RECONHECIMENTO);
+
+                        mMainActivity.updateImageView(R.drawable.frame_verde);
+
+                        new Handler().postDelayed(new Runnable() {
+                            public void run() {
+                                Log.e("com.luxand", "REGISTERED");
+                                response(false, "REGISTERED", template);
+                                //return;
+                            }
+                        }, 1000);
+                    }
                 }
 
+            } else {
+                Log.d("com.luxand", "FAKE - " + liveness[0]);
+                FSDK.FreeImage(RotatedImage);
                 return;
             }
+        } else {
+            FSDK.FreeImage(RotatedImage);
+            if (mStopping == 0) {
+                mMainActivity.updateTextView(Constants.ENQUADRE_ROSTO);
+                mMainActivity.updateImageView(R.drawable.frame_branco);
+            }
 
-        Log.e("PROGRESS", "Final");
+            return;
+        }
+
+        FSDK.FreeImage(RotatedImage);
+
         super.onDraw(canvas);
     } // end onDraw method
 
@@ -436,8 +368,6 @@ class ProcessImageAndDrawResults extends View {
         try {
             obj.put("error", error);
             obj.put("message", message);
-            obj.put("name", name);
-            obj.put("id", this.correspondingId);
             obj.put("template", template);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -447,16 +377,6 @@ class ProcessImageAndDrawResults extends View {
             this.onImageProcessListener.handle(obj);
         }
 
-    }
-
-    private String generateName() {
-        return "OML-LUXAND" + new Date().getTime();
-    }
-
-    private void remove(long id) {
-        FSDK.LockID(mTracker, id);
-        FSDK.PurgeID(mTracker, id);
-        FSDK.UnlockID(mTracker, id);
     }
 
     /**
@@ -503,48 +423,10 @@ class ProcessImageAndDrawResults extends View {
         // Limpa a imagem
         FSDK.FreeImage(imagem);
 
-        Log.d("MATCH_FACES_PARAM", String.valueOf(this.matchFacesParam));
+        Log.d("com.luxand", "MATCH_FACES_PARAM - " + this.matchFacesParam);
 
         // As faces são iguais?
         return this.similarity[0] > this.matchFacesParam;
-    }
-
-    private String performRegistrationAgain(long id) {
-        FSDK.LockID(mTracker, id);
-        String[] names = new String[1];
-        FSDK.GetAllNames(mTracker, id, names, 1024);
-        FSDK.UnlockID(mTracker, id);
-
-        if (names[0] != null && names[0].length() > 0) {
-            return names[0];
-        } else {
-            return null;
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private int register(long id, FSDK.HImage imagem) {
-
-        Boolean match = compararTemplates(imagem);
-
-        if (match) {
-            return ALREADY_REGISTERED;
-        }
-
-        FSDK.LockID(mTracker, id);
-        String userName = generateName();
-        generatedName = userName;
-
-        boolean r;
-        r = FSDK.SetName(mTracker, id, userName) == FSDK.FSDKE_OK;
-
-        if (userName.length() <= 0) {
-            r = false;
-            FSDK.PurgeID(mTracker, id);
-        }
-
-        FSDK.UnlockID(mTracker, id);
-        return r ? REGISTERED : NOT_REGISTERED;
     }
 
     void GetFaceFrame(FSDK.FSDK_Features Features, FaceRectangle fr) {
