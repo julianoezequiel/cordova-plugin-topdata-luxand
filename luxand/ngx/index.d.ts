@@ -18,12 +18,6 @@ export interface OMLFacialData {
     /** Mensagem retornada pelo plugin */
     message: string;
 
-    /** Nome exclusivo gerado e associado a uma face ao se registrar (o identificador é uma chave alfanumérica) */
-    name: string;
-
-    /** Tracker ID - exclusivo associa-se a uma face no banco de dados interno */
-    id: number;
-
     /** Template da face (formato BASE64) */
     template: string;
     
