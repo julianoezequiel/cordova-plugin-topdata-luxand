@@ -700,13 +700,6 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     [luxandProcessor sendResult:ret];
 }
 
--(bool) remove: (long) id {
-    FSDK_LockID(_tracker, id);
-    int ok = FSDK_PurgeID(_tracker, id);
-    FSDK_UnlockID(_tracker, id);
-    return ok == FSDKE_OK;
-}
-
 -(bool) compararTemplates: (HImage) imagemRef {
 
     // Decodifica o template de referência: base64 -> array de char
