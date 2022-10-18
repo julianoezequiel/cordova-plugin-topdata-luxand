@@ -13,7 +13,7 @@ import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.util.Log;
 
 import com.luxand.FSDK;
@@ -39,7 +39,6 @@ public class Luxand extends CordovaPlugin {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean execute(String action, JSONArray data, CallbackContext callbackContext) throws JSONException {
-        Log.d("com.luxand.dsi-------", action + ":" + data.toString());
         this.callbackContext = callbackContext;
         this.reqArgs = data;
 
@@ -226,20 +225,21 @@ public class Luxand extends CordovaPlugin {
         if (REQUEST_CODE == REGISTER_CODE || REQUEST_CODE == COMPARE_CODE) {
             String requestType = REQUEST_CODE == REGISTER_CODE ? "FOR_REGISTER" : "FOR_LOGIN";
 
+            Log.d("com.luxand", "LIVENESS_PARAM -> " + livenessParam);
+            Log.d("com.luxand", "MATCH_FACES_PARAM -> " + matchFacesParam);
+
             intent.putExtra("TYPE", requestType);
             intent.putExtra("TEMPLATE", template);
             intent.putExtra("LIVENESS_PARAM", livenessParam);
             intent.putExtra("MATCH_FACES_PARAM", matchFacesParam);
         }
 
-        Log.d("com.luxand.dsi::", "" + intent.getExtras());
         cordova.startActivityForResult(this, intent, REQUEST_CODE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (data == null || this.callbackContext == null) return;
-        CallbackContext callback = this.callbackContext;
+        if (data == null) return;
         Log.d("com.luxand.dsi::", requestCode + ":" + resultCode);
         if (requestCode == COMPARE_CODE) {
             if (resultCode == Activity.RESULT_OK && data.hasExtra("data")) {
@@ -253,18 +253,18 @@ public class Luxand extends CordovaPlugin {
                     PluginResult result = new PluginResult(PluginResult.Status.OK, resData);
 
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    this.callbackContext.sendPluginResult(result);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                     PluginResult result = new PluginResult(PluginResult.Status.ERROR);
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    this.callbackContext.sendPluginResult(result);
                 }
             } else {
                 PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Unable to identify user");
                 result.setKeepCallback(true);
-                callback.sendPluginResult(result);
+                this.callbackContext.sendPluginResult(result);
             }
         } else if (requestCode == REGISTER_CODE) {
             if (resultCode == Activity.RESULT_OK && data.hasExtra("data")) {
@@ -277,18 +277,18 @@ public class Luxand extends CordovaPlugin {
                     PluginResult result = new PluginResult(PluginResult.Status.OK, resData);
 
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    this.callbackContext.sendPluginResult(result);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                     PluginResult result = new PluginResult(PluginResult.Status.ERROR);
                     result.setKeepCallback(true);
-                    callback.sendPluginResult(result);
+                    this.callbackContext.sendPluginResult(result);
                 }
             } else {
                 PluginResult result = new PluginResult(PluginResult.Status.ERROR, "Unable to identify user");
                 result.setKeepCallback(true);
-                callback.sendPluginResult(result);
+                this.callbackContext.sendPluginResult(result);
             }
         }
     }

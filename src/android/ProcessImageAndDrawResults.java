@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
+
+import androidx.annotation.RequiresApi;
+
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -157,7 +159,7 @@ class ProcessImageAndDrawResults extends View {
             new Handler().postDelayed(new Runnable() {
                 public void run() {*/
             Log.e("com.luxand", "TIME OUT");
-            response(true, "DETECTION_TIMEOUT", "");
+            response(true, "DETECTION_TIMEOUT");
             return;
                 /*}
             }, 4000);*/
@@ -204,9 +206,6 @@ class ProcessImageAndDrawResults extends View {
         faceLock.unlock();
 
         // A FACE ESTÁ ENQUADRADA NO FRAME && EXISTE APENAS UMA FACE DETECTADA
-        Log.e("com.luxand", "FACE_COUNT - " + face_count[0]);
-        Log.e("com.luxand", "FACE_ENQUADRADA - " + faceEnquadrada());
-
         if (faceEnquadrada() && face_count[0] == 1 && mStopping == 0) {
 
             mMainActivity.updateImageView(R.drawable.frame_amarelo);
@@ -219,11 +218,9 @@ class ProcessImageAndDrawResults extends View {
                 FSDK.GetValueConfidence(value[0], "Liveness", liveness);
             }
 
-            float livenessMaior = 0f;
-
+            /*float livenessMaior = 0f;
             livenessMaior = Math.max(liveness[0], livenessMaior);
-            Log.d("com.luxand", "LIVENESS_MAIOR - " + livenessMaior);
-            Log.d("com.luxand", "LIVENESS_PARAM - " + this.livenessParam);
+            Log.d("com.luxand", "LIVENESS_MAIOR - " + livenessMaior);*/
 
             if (liveness[0] > this.livenessParam) {
                 Log.d("com.luxand", "LIVE");
@@ -253,7 +250,7 @@ class ProcessImageAndDrawResults extends View {
                             new Handler().postDelayed(new Runnable() {
                                 public void run() {
                                     Log.e("com.luxand", "FACE_EQUALS");
-                                    response(false, "FACE_EQUALS", template);
+                                    response(false, "FACE_EQUALS");
                                     //return;
                                 }
                             }, 1000);
@@ -268,7 +265,7 @@ class ProcessImageAndDrawResults extends View {
                                 new Handler().postDelayed(new Runnable() {
                                     public void run() {*/
                             Log.e("com.luxand", "FAIL_COMPARE");
-                            response(true, "FAIL_COMPARE", "");
+                            response(true, "FAIL_COMPARE");
                             return;
                                     /*}
                                 }, 4000);*/
@@ -286,7 +283,6 @@ class ProcessImageAndDrawResults extends View {
                         registerCheckCount++;
                         mMainActivity.updateImageView(R.drawable.frame_amarelo);
 
-                        // Face registrada
                         boolean ok = getTemplate(RotatedImage);
 
                         if (!ok) {
@@ -297,7 +293,7 @@ class ProcessImageAndDrawResults extends View {
                                     new Handler().postDelayed(new Runnable() {
                                         public void run() {*/
                             Log.e("com.luxand", "ERROR_GET_TEMPLATE");
-                            response(true, "ERROR_GET_TEMPLATE", "");
+                            response(true, "ERROR_GET_TEMPLATE");
                             return;
                                         /*}
                                     }, 4000);*/
@@ -313,7 +309,7 @@ class ProcessImageAndDrawResults extends View {
                         new Handler().postDelayed(new Runnable() {
                             public void run() {
                                 Log.e("com.luxand", "REGISTERED");
-                                response(false, "REGISTERED", template);
+                                response(false, "REGISTERED");
                                 //return;
                             }
                         }, 1000);
@@ -359,16 +355,15 @@ class ProcessImageAndDrawResults extends View {
      *
      * @param error    Resposta com erro ou não
      * @param message  Mensagem de resposta
-     * @param template Template da face detectada
      */
-    private void response(boolean error, String message, String template) {
+    private void response(boolean error, String message) {
         FSDK.FreeTracker(mTracker);
 
         JSONObject obj = new JSONObject();
         try {
             obj.put("error", error);
             obj.put("message", message);
-            obj.put("template", template);
+            obj.put("template", !template.equals("") && isRegister ? template : "");
         } catch (JSONException e) {
             e.printStackTrace();
             obj = new JSONObject();
@@ -376,7 +371,6 @@ class ProcessImageAndDrawResults extends View {
         if (this.onImageProcessListener != null) {
             this.onImageProcessListener.handle(obj);
         }
-
     }
 
     /**
@@ -422,8 +416,6 @@ class ProcessImageAndDrawResults extends View {
 
         // Limpa a imagem
         FSDK.FreeImage(imagem);
-
-        Log.d("com.luxand", "MATCH_FACES_PARAM - " + this.matchFacesParam);
 
         // As faces são iguais?
         return this.similarity[0] > this.matchFacesParam;

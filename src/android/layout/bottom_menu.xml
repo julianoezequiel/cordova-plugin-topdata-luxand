@@ -13,7 +13,7 @@
         android:id="@+id/footer"
         style="@android:style/ButtonBar"
         android:layout_width="fill_parent"
-        android:layout_height="125dp"
+        android:layout_height="170dp"
         android:layout_alignParentBottom="true"
         android:background="#272727"
         android:orientation="horizontal">
@@ -22,23 +22,19 @@
             android:id="@+id/dateTimeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
             android:textColor="#FFFFFF"
-            android:textSize="15sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
-
 
         <TextView
             android:id="@+id/textInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
+            android:layout_centerInParent="true"
             android:textColor="#FFFFFF"
-            android:textSize="15sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
-
-
     </RelativeLayout>
 </RelativeLayout>

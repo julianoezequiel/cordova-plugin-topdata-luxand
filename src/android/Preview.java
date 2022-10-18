@@ -7,10 +7,12 @@ import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
 
+import java.util.Arrays;
 import java.util.List;
 
 class Preview extends SurfaceView implements SurfaceHolder.Callback {
@@ -60,7 +62,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
             // Preview callback used whenever new viewfinder frame is available
             mCamera.setPreviewCallback(new Camera.PreviewCallback() {
                 public void onPreviewFrame(byte[] data, Camera camera) {
-                    if ( (mDraw == null) || mFinished )
+                    if ((mDraw == null) || mFinished)
                         return;
 
                     if (mDraw.mYUVData == null) {
@@ -77,10 +79,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
                     mDraw.invalidate();
                 }
             });
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setMessage("Cannot open camera" )
+            builder.setMessage("Cannot open camera")
                     .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -131,30 +132,21 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
         /**/
 
         // choose preview size closer to 640x480 for optimal performance
-        /*List<Camera.Size> supportedSizes = parameters.getSupportedPreviewSizes();
+        List<Camera.Size> supportedSizes = parameters.getSupportedPreviewSizes();
         int width = 0;
         int height = 0;
-        for (Camera.Size s: supportedSizes) {
-            if ((width - 640)*(width - 640) + (height - 480)*(height - 480) >
-                    (s.width - 640)*(s.width - 640) + (s.height - 480)*(s.height - 480)) {
+        for (Camera.Size s : supportedSizes) {
+            if ((width - 700) * (width - 700) + (height - 600) * (height - 600) >
+                    (s.width - 700) * (s.width - 700) + (s.height - 600) * (s.height - 600)) {
                 width = s.width;
                 height = s.height;
             }
-        }*/
-
-        int heightInvert = 0;
-        int widthInvert = 0;
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
-        heightInvert = displayMetrics.widthPixels;
-        widthInvert = displayMetrics.heightPixels;
+        }
 
         //try to set preferred parameters
         try {
-            if (widthInvert*heightInvert > 0) {
-                parameters.setPreviewSize(widthInvert, heightInvert);
+            if (width * height > 0) {
+                parameters.setPreviewSize(width, height);
             }
             //parameters.setPreviewFrameRate(10);
             parameters.setSceneMode(Camera.Parameters.SCENE_MODE_PORTRAIT);
@@ -167,17 +159,23 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
         parameters = mCamera.getParameters();
         Camera.Size previewSize = parameters.getPreviewSize();
         makeResizeForCameraAspect(1.0f / ((1.0f * previewSize.width) / previewSize.height));
+
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        layoutParams.height = getLayoutParams().height + 60;
+        layoutParams.width = getLayoutParams().width;
+        setLayoutParams(layoutParams);
     }
 
-    private void makeResizeForCameraAspect(float cameraAspectRatio){
+    private void makeResizeForCameraAspect(float cameraAspectRatio) {
         ViewGroup.LayoutParams layoutParams = this.getLayoutParams();
         int matchParentWidth = this.getWidth();
-        int newHeight = (int)(matchParentWidth/cameraAspectRatio);
+        int newHeight = (int) (matchParentWidth / cameraAspectRatio);
         if (newHeight != layoutParams.height) {
             layoutParams.height = newHeight;
             layoutParams.width = matchParentWidth;
+
             this.setLayoutParams(layoutParams);
             this.invalidate();
         }
     }
-} // end of Preview class
+} // end of Preview classz\

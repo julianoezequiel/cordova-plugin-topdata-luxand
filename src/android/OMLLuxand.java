@@ -12,8 +12,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -166,6 +166,7 @@ public class OMLLuxand extends Activity implements OnClickListener {
      * Método responsável por atualizar a imagem de enquadrado da face (ID: faceFrame)
      */
     public void updateImageView(@DrawableRes int faceFrame) {
+
 
         ImageView imageView = findViewById(R.id.faceFrame);
 
