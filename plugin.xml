@@ -55,7 +55,7 @@
              <string>${PRODUCT_NAME} requires access to your phone’s camera.</string>
         </config-file>
         <source-file src="libfsdk-static.a" framework="true" />
-        <source-file src="libfsdk-static_64.a" framework="true" />
+        <!-- <source-file src="libfsdk-static_64.a" framework="true" /> -->
         <header-file src="src/ios/LuxandFaceSDK.h"/>
         <source-file src="src/ios/Luxand.mm"/>
         <header-file src="src/ios/Luxand.h"/>
