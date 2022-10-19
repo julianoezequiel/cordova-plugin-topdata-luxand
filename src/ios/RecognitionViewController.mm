@@ -1,5 +1,6 @@
 #import "RecognitionViewController.h"
 #import "Luxand.h"
+#import <QuartzCore/QuartzCore.h>
 
 int const ALREADY_REGISTERED = 1;
 int const REGISTERED = 2;
@@ -24,17 +25,17 @@ enum {
 @synthesize processingImage = _processingImage;
 
 #pragma mark -
-#pragma mark Face frame functions 
+#pragma mark Face frame functions
 
 inline bool PointInRectangle(int point_x, int point_y, int rect_x1, int rect_y1, int rect_x2, int rect_y2)
 {
-    return (point_x >= rect_x1) && (point_x <= rect_x2) && (point_y >= rect_y1) && (point_y <= rect_y2);  
+    return (point_x >= rect_x1) && (point_x <= rect_x2) && (point_y >= rect_y1) && (point_y <= rect_y2);
 }
 
 int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, int * y2)
 {
-	if (!Features || !x1 || !y1 || !x2 || !y2)
-		return FSDKE_INVALID_ARGUMENT;
+    if (!Features || !x1 || !y1 || !x2 || !y2)
+        return FSDKE_INVALID_ARGUMENT;
     
     float u1 = (float)(*Features)[0].x;
     float v1 = (float)(*Features)[0].y;
@@ -53,7 +54,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     } else {
         *y2 = *y1 + *x2 - *x1;
     }
-	return 0;
+    return 0;
 }
 
 - (void)resetTrackerParameters
@@ -127,28 +128,47 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
 }
 
 //init view, glview and camera
-- (void)loadView 
+- (void)loadView
 {
     CGRect mainScreenFrame = [[UIScreen mainScreen] bounds];
     UIView *primaryView = [[UIView alloc] initWithFrame:mainScreenFrame];
     self.view = primaryView;
     primaryView = nil; //now self is responsible for the view
-
+    
     //CGRect applicationFrame = [screenForDisplay applicationFrame];
     //_glView = [[RecognitionGLView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, applicationFrame.size.width, applicationFrame.size.height)];
     
     _glView = [[RecognitionGLView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, mainScreenFrame.size.width, mainScreenFrame.size.height)];
     //_glView will be re-initialized in (void)drawFrame with proper size
 
-    [self.view addSubview:_glView];
+    [self.view addSubview: _glView];
+    
+    // FRAME FIXO
+    CGFloat width = 230;
+    CGFloat height = 250;
+    CGFloat x = (mainScreenFrame.size.width - width) * 0.5f;
+    CGFloat y = (mainScreenFrame.size.height - height) * 0.2f;
+    CGRect frame = CGRectMake(x, y, width, height);
+    
+    UIView *frameView = [[UIView alloc] initWithFrame: frame];
+    
+    frameView.backgroundColor = [UIColor clearColor];
+    frameView.layer.borderColor = [[UIColor blueColor] CGColor];
+    frameView.layer.borderWidth = 3.0;
+    
+    [self.view addSubview: frameView];
+    
+
     //_glView = nil; //now self.view is responsible for the view
 
     
     // Set up the toolbar at the bottom of the screen
-    toolbar = [UIToolbar new];
+    /*toolbar = [UIToolbar new];
     toolbar.barStyle = UIBarStyleBlack;
+    toolbar.backgroundColor =[UIColor colorWithDisplayP3Red:39 green:39 blue:39 alpha:1];
     
-    UIBarButtonItem * clearItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash
+    
+    /*UIBarButtonItem * clearItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash
         target:self action:nil];
     
     UIBarButtonItem * flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
@@ -165,19 +185,36 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     
     // size up the toolbar and set its frame, note that it will work only for views without Navigation toolbars.
     [toolbar sizeToFit];
-    CGFloat toolbarHeight = [toolbar frame].size.height;
+    CGFloat toolbarHeight = 150;
     CGRect mainViewBounds = self.view.bounds;
     [toolbar setFrame:CGRectMake(CGRectGetMinX(mainViewBounds),
                                  CGRectGetMinY(mainViewBounds) + CGRectGetHeight(mainViewBounds) - (toolbarHeight),
                                  CGRectGetWidth(mainViewBounds),
                                  toolbarHeight)];
-    [self.view addSubview:toolbar];
-    toolbar = nil;
+    [self.view addSubview:toolbar];*/
+    //toolbar = nil;
     
+    // teste primaryView.frame = CGRectMake(0, 0, 320 , self.view.frame.size.height - 50);
+    
+    UILabel *label = [[UILabel alloc] initWithFrame: CGRectMake(0, 0, 0, 0)];
+    label.backgroundColor = [UIColor clearColor];
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:label];
+    label.text = @"ENQUADRE O ROSTO PARA O RECONHECIMENTO";
+    label.textAlignment = NSTextAlignmentCenter;
+    
+    [label setFont:[UIFont systemFontOfSize: 15]];
+    
+    label.numberOfLines = 1;
+    CGSize maximumLabelSize = CGSizeMake(label.frame.size.width, CGFLOAT_MAX);
+    CGSize expectSize = [label sizeThatFits:maximumLabelSize];
+    
+    label.frame = CGRectMake(label.frame.origin.x, label.frame.origin.y, expectSize.width, expectSize.height);
+    
+    [toolbar addSubview: label];
     
     [self loadVertexShader:@"DirectDisplayShader" fragmentShader:@"DirectDisplayShader" forProgram:&directDisplayProgram];
      
-    // Creating MAX_FACES number of face tracking rectangles
+    // Desenhando frames nos rostos detectados
     for (int i=0; i<MAX_FACES; ++i) {
         trackingRects[i] = [[CALayer alloc] init];
         trackingRects[i].bounds = CGRectMake(0.0f, 0.0f, 0.0f, 0.0f);
@@ -199,37 +236,36 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
         //nameLabels[i]  = nil;
     }
     
-    // Disable animations for move and resize (otherwise trackingRect will jump) 
-	for (int i=0; i<MAX_FACES; ++i) {
+    // Disable animations for move and resize (otherwise trackingRect will jump)
+    for (int i=0; i<MAX_FACES; ++i) {
         NSMutableDictionary * newActions = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"position", [NSNull null], @"bounds", nil];
         trackingRects[i].actions = newActions;
         newActions = nil;
     }
-	for (int i=0; i<MAX_FACES; ++i) {
+    for (int i=0; i<MAX_FACES; ++i) {
         NSMutableDictionary * newActions = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"position", [NSNull null], @"bounds", nil];
         nameLabels[i].actions = newActions;
         newActions = nil;
     }
-	
+    
     for (int i=0; i<MAX_FACES; ++i) {
         [_glView.layer addSublayer:trackingRects[i]];
-    }    
+    }
     
-	camera = [[RecognitionCamera alloc] init];
-	camera.delegate = self; //we want to receive processNewCameraFrame messages
-	[self cameraHasConnected]; //the method doesn't perform any work now
+    camera = [[RecognitionCamera alloc] init];
+    camera.delegate = self; //we want to receive processNewCameraFrame messages
+    [self cameraHasConnected]; //the method doesn't perform any work now
+    
+    // AJUSTE DE POSIÇĀO CAMERA
+    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+    [self relocateSubviewsForOrientation:orientation];
 }
 
-- (void)didReceiveMemoryWarning 
-{
-//    [super didReceiveMemoryWarning];
-}
-
-- (void)dealloc 
+- (void)dealloc
 {
     for (int i=0; i<MAX_FACES; ++i) {
         trackingRects[i] = nil;
-    }    
+    }
     camera = nil;
     faceDataLock = nil;
     faceDataLock = NULL;
@@ -391,7 +427,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     // Create and compile fragment shader.
     fragShaderPathname = [[NSBundle mainBundle] pathForResource:fragmentShaderName ofType:@"fsh"];
     if (![self compileShader:&fragShader type:GL_FRAGMENT_SHADER file:fragShaderPathname]) {
-#if defined(DEBUG)        
+#if defined(DEBUG)
         NSLog(@"Failed to compile fragment shader");
 #endif
         return FALSE;
@@ -412,7 +448,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     if (![self linkProgram:*programPointer]) {
 #if defined(DEBUG)
         NSLog(@"Failed to link program: %d", *programPointer);
-#endif        
+#endif
         // cleaning up
         if (vertexShader) {
             glDeleteShader(vertexShader);
@@ -432,10 +468,10 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     // Release vertex and fragment shaders.
     if (vertexShader) {
         glDeleteShader(vertexShader);
-	}
+    }
     if (fragShader) {
-        glDeleteShader(fragShader);		
-	}
+        glDeleteShader(fragShader);
+    }
     return TRUE;
 }
 
@@ -513,7 +549,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
 
 
 #pragma mark -
-#pragma mark RecognitionCameraDelegate methods: get image from camera and process it
+#pragma mark Métodos RecognitionCameraDelegate: obtenha a imagem da câmera e processe-a
 
 - (void)cameraHasConnected
 {
@@ -574,6 +610,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
         args.height = bufferHeight;
         args.scanline = scanline;
         args.buffer = buffer;
+        
         UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
         if (orientation == 0 || orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown) {
             //args.ratio = (float)self.view.bounds.size.height/(float)bufferWidth;
@@ -594,56 +631,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
 }
 
 #pragma mark -
-#pragma mark Touch handling
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
-{
-	//CGPoint movedPoint = [[touches anyObject] locationInView:self.view]; 
-	//CGFloat distanceMoved = sqrt( (movedPoint.x - currentTouchPoint.x) * (movedPoint.x - currentTouchPoint.x) + (movedPoint.y - currentTouchPoint.y) * (movedPoint.y - currentTouchPoint.y) );
-}
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event 
-{
-}
-
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event 
-{
-}
-
-
-
-#pragma mark -
-#pragma mark Device rotation support
-
-//auto-rotate enabler (if compiling for iOS6+ only use the project's properties to enable orientations and change this method to shouldAutorotate)
-- (BOOL)shouldAutorotate:(UIInterfaceOrientation)interfaceOrientation
-{
-    //if (video_started) {
-    //    rotating = YES;
-    //}
-    return YES;
-}
-
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    //orientation = toInterfaceOrientation;
-    rotating = YES;
-    for (int i=0; i<MAX_FACES; ++i) {
-        [trackingRects[i] setHidden:YES];
-    }
-    [toolbar setHidden:YES];
-    [_glView setHidden:YES];
-    //[UIView setAnimationsEnabled:NO];
-}
-
-//not called on first times screen rotating in iOS (on start):
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
-{
-    //[UIView setAnimationsEnabled:YES];
-    for (int i=0; i<MAX_FACES; ++i) {
-        [trackingRects[i] setHidden:NO];
-    }
-    rotating = NO;
-}
+#pragma mark Suporte de rotação do dispositivo
 
 - (CGSize)screenSizeOrientationIndependent {
     CGSize screenSize = [UIScreen mainScreen].bounds.size;
@@ -681,87 +669,15 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     }
     
     // Toolbar re-alignment
-    CGFloat toolbarHeight = [toolbar frame].size.height;
+    /*CGFloat toolbarHeight = [toolbar frame].size.height;
     CGRect mainViewBounds = self.view.bounds;
     [toolbar setFrame:CGRectMake(CGRectGetMinX(mainViewBounds),
                                  CGRectGetMinY(mainViewBounds) + CGRectGetHeight(mainViewBounds) - (toolbarHeight),
                                  CGRectGetWidth(mainViewBounds),
                                  toolbarHeight)];
-    [toolbar setHidden:NO];
+    [toolbar setHidden:NO];*/
     [self.view sendSubviewToBack:_glView];
 }
-
--(void) response: (BOOL) error message:(NSString*) message {
-    NSMutableDictionary *ret = [[NSMutableDictionary alloc] initWithObjectsAndKeys:(error ? @"FAIL" :@"SUCCESS"), @"status", nil];
-    [ret setObject:@(error) forKey:@"error"];
-    [ret setObject:message forKey:@"message"];
-    [ret setObject: templateResponse && isRegister ? templateResponse : @""  forKey:@"template"];
-    
-    [luxandProcessor sendResult:ret];
-}
-
--(bool) compararTemplates: (HImage) imagemRef {
-
-    // Decodifica o template de referência: base64 -> array de char
-    FSDK_FaceTemplate * faceTemplateRef = (FSDK_FaceTemplate *) malloc(1040);
-
-    NSData * decodedData = [[NSData alloc] initWithBase64EncodedString: templateRef options: NSDataBase64DecodingIgnoreUnknownCharacters];
-    memcpy(faceTemplateRef -> ftemplate, [decodedData bytes], 1040);
-
-    // Busca o template a partir da imagem detectada
-    FSDK_FaceTemplate * faceTemplateDetected = (FSDK_FaceTemplate *) malloc(1040);
-    FSDK_GetFaceTemplate(imagemRef, faceTemplateDetected);
-    
-    float * similarity = new float(0.0f);
-    FSDK_MatchFaces(faceTemplateDetected, faceTemplateRef, similarity);
-    
-    // As faces sāo iguais?
-    return * similarity > luxandProcessor.matchFacesParam;
-}
-
-- (bool) getTemplate:(HImage)imagemRef {
-    
-    // Busca o template a partir da imagem detectada
-    FSDK_FaceTemplate * faceTemplate= (FSDK_FaceTemplate *) malloc(1040);
-    int ok = FSDK_GetFaceTemplate(imagemRef, faceTemplate);
-    
-    // Codifica o template da face detectada: array de char -> base64
-    templateResponse = [self encondeToBase64: faceTemplate -> ftemplate];
-    
-    return ok == FSDKE_OK;
-}
-
--(NSString *) encondeToBase64: (char *) theData {
-    const uint8_t * input = (const uint8_t * ) theData;
-    NSInteger length = 1040;
-
-    static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-    NSMutableData* data = [NSMutableData dataWithLength:((length + 2) / 3) * 4];
-    uint8_t* output = (uint8_t*)data.mutableBytes;
-
-    NSInteger i;
-    for (i=0; i < length; i += 3) {
-        NSInteger value = 0;
-        NSInteger j;
-        for (j = i; j < (i + 3); j++) {
-            value <<= 8;
-
-            if (j < length) {
-                value |= (0xFF & input[j]);
-            }
-        }
-
-        NSInteger theIndex = (i / 3) * 4;
-        output[theIndex + 0] =                    table[(value >> 18) & 0x3F];
-        output[theIndex + 1] =                    table[(value >> 12) & 0x3F];
-        output[theIndex + 2] = (i + 1) < length ? table[(value >> 6)  & 0x3F] : '=';
-        output[theIndex + 3] = (i + 2) < length ? table[(value >> 0)  & 0x3F] : '=';
-    }
-
-    return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-}
-
 #pragma mark -
 #pragma mark Face detection and recognition
 
@@ -891,83 +807,177 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
         //NSLog(@"w=%d x=%d y=%d", faces[i].x1, faces[i].x2, faces[i].y1);
     }
     [faceDataLock unlock];
-    
-    char * value = (char *) malloc(1024);
-    float * liveness = new float(0.0f);
 
-    int ok = FSDK_GetTrackerFacialAttribute(_tracker, 0, IDs[0], "Liveness", value, 1024);
-    if (ok == FSDKE_OK) {
-        FSDK_GetValueConfidence(value, "Liveness", liveness);
-    }
-    
-    free(value);
-
-    if (* liveness > luxandProcessor.livenessParam) {
-        NSLog(@"com.luxand: LIVE");
+    if ([self faceEnquadrada]) {
         
-        if(!isRegister) {
-            // COMPARAR FACES
-            identified = false;
+        char * value = (char *) malloc(1024);
+        float liveness = 0;
+
+        int ok = FSDK_GetTrackerFacialAttribute(_tracker, 0, IDs[0], "Liveness", value, 1024);
+
+        if (ok == FSDKE_OK) {
+            FSDK_GetValueConfidence(value, "Liveness", &liveness);
+        }
+        
+        free(value);
+        
+        if (liveness > luxandProcessor.livenessParam) {
+            NSLog(@"com.luxand: LIVE -> %f", liveness);
             
-            if(count > 1) {
-                if(tryCount< initialTryCount) {
-                    NSLog(@"com.luxand: Múltiplas faces detectadas...");
-                }
-            }else if(count == 1) {
+            if(!isRegister) {
+                // COMPARAR FACES
+                identified = false;
                 
-                // Mark and name faces
-                for(int i=0;i<count; i++) {
-                    identified = [self compararTemplates: derotated_image];
-                }
-                
-                if(tryCount <= initialTryCount && identified) {
-                    NSLog(@"com.luxand: FACE_EQUALS");
-                    [self response:false message:@"FACE_EQUALS"];
-                    _closing = 1;
-                    return;
-                }
-                
-                tryCount++;
-                
-                if(tryCount >= initialTryCount) {
-                    NSLog(@"com.luxand: FAIL_COMPARE");
-                    [self response:true message:@"FAIL_COMPARE"];
-                    _closing = 1;
-                    return;
-                }
-            }
-        }else {
-            // REGISTRAR FACE
-            if(count > 1) {
-                if(tryCount < initialTryCount) {
-                    NSLog(@"com.luxand: Múltiplas faces detectadas...");
-                }
-            }else if(count == 1){ 
+                if(count > 1) {
+                    if(tryCount< initialTryCount) {
+                        NSLog(@"com.luxand: Múltiplas faces detectadas...");
+                    }
+                }else if(count == 1) {
                     
-                    tryCount++;
-                
-                    BOOL ok = [self getTemplate: derotated_image];
+                    // Mark and name faces
+                    for(int i=0;i<count; i++) {
+                        identified = [self compararTemplates: derotated_image];
+                    }
                     
-                    if (!ok) {
-                        NSLog(@"com.luxand: ERROR_GET_TEMPLATE");
-                        [self response: true message: @"ERROR_GET_TEMPLATE"];
+                    if(tryCount <= initialTryCount && identified) {
+                        NSLog(@"com.luxand: FACE_EQUALS");
+                        [self response:false message:@"FACE_EQUALS"];
                         _closing = 1;
                         return;
                     }
                     
-                    NSLog(@"com.luxand: REGISTERED");
-                    [self response: false message: @"REGISTERED"];
-                    _closing = 1;
-                    return;
+                    tryCount++;
+                    
+                    if(tryCount >= initialTryCount) {
+                        NSLog(@"com.luxand: FAIL_COMPARE");
+                        [self response:true message:@"FAIL_COMPARE"];
+                        _closing = 1;
+                        return;
+                    }
+                }
+            }else {
+                // REGISTRAR FACE
+                if(count > 1) {
+                    if(tryCount < initialTryCount) {
+                        NSLog(@"com.luxand: Múltiplas faces detectadas...");
+                    }
+                }else if(count == 1){
+                        
+                        tryCount++;
+                    
+                        BOOL ok = [self getTemplate: derotated_image];
+                        
+                        if (!ok) {
+                            NSLog(@"com.luxand: ERROR_GET_TEMPLATE");
+                            [self response: true message: @"ERROR_GET_TEMPLATE"];
+                            _closing = 1;
+                            return;
+                        }
+                        
+                        NSLog(@"com.luxand: REGISTERED");
+                        [self response: false message: @"REGISTERED"];
+                        _closing = 1;
+                        return;
+                }
             }
+        } else {
+            NSLog(@"com.luxand: FAKE -> %f", liveness);
         }
-    } else {
-        NSLog(@"com.luxand: FAKE - %f", *liveness);
     }
-
+    
     FSDK_FreeImage(image);
     FSDK_FreeImage(derotated_image);
     _processingImage = NO;
+}
+
+-(void) response: (BOOL) error message:(NSString*) message {
+    NSMutableDictionary *ret = [[NSMutableDictionary alloc] initWithObjectsAndKeys:(error ? @"FAIL" :@"SUCCESS"), @"status", nil];
+    [ret setObject:@(error) forKey:@"error"];
+    [ret setObject:message forKey:@"message"];
+    [ret setObject: templateResponse && isRegister ? templateResponse : @""  forKey:@"template"];
+    
+    [luxandProcessor sendResult:ret];
+}
+
+-(bool) compararTemplates: (HImage) imagemRef {
+
+    // Decodifica o template de referência: base64 -> array de char
+    FSDK_FaceTemplate * faceTemplateRef = (FSDK_FaceTemplate *) malloc(1040);
+
+    NSData * decodedData = [[NSData alloc] initWithBase64EncodedString: templateRef options: NSDataBase64DecodingIgnoreUnknownCharacters];
+    memcpy(faceTemplateRef -> ftemplate, [decodedData bytes], 1040);
+
+    // Busca o template a partir da imagem detectada
+    FSDK_FaceTemplate * faceTemplateDetected = (FSDK_FaceTemplate *) malloc(1040);
+    FSDK_GetFaceTemplate(imagemRef, faceTemplateDetected);
+    
+    float similarity = 0;
+    FSDK_MatchFaces(faceTemplateDetected, faceTemplateRef, &similarity);
+    
+    // As faces sāo iguais?
+    return similarity > luxandProcessor.matchFacesParam;
+}
+
+- (bool) getTemplate:(HImage)imagemRef {
+    
+    // Busca o template a partir da imagem detectada
+    FSDK_FaceTemplate * faceTemplate= (FSDK_FaceTemplate *) malloc(1040);
+    int ok = FSDK_GetFaceTemplate(imagemRef, faceTemplate);
+    
+    // Codifica o template da face detectada: array de char -> base64
+    templateResponse = [self encondeToBase64: faceTemplate -> ftemplate];
+    
+    return ok == FSDKE_OK;
+}
+
+- (bool) faceEnquadrada {
+    /*NSLog(@"");
+    NSLog(@"----------------------------");
+    NSLog(@"com.luxand: FACE X1 -> %d", faces[0].x1);
+    NSLog(@"com.luxand: FACE Y1 -> %d", faces[0].y1);
+    NSLog(@"com.luxand: FACE X2 -> %d", faces[0].x2);
+    NSLog(@"com.luxand: FACE Y2 -> %d", faces[0].y2);
+    NSLog(@"----------------------------");*/
+    
+    // FRAME FIXO
+    CGRect mainScreenFrame = [[UIScreen mainScreen] bounds];
+    CGFloat width = 230;
+    CGFloat height = 250;
+    float x = (mainScreenFrame.size.width - width) * 0.5f;
+    float y = (mainScreenFrame.size.height - height) * 0.2f;
+    
+    return (x >= faces[0].x1 && faces[0].x1 > 55) && (x <= faces[0].x2) && (y >= faces[0].y1) && (y <= faces[0].y2);
+}
+
+-(NSString *) encondeToBase64: (char *) theData {
+    const uint8_t * input = (const uint8_t * ) theData;
+    NSInteger length = 1040;
+
+    static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+    NSMutableData* data = [NSMutableData dataWithLength:((length + 2) / 3) * 4];
+    uint8_t* output = (uint8_t*)data.mutableBytes;
+
+    NSInteger i;
+    for (i=0; i < length; i += 3) {
+        NSInteger value = 0;
+        NSInteger j;
+        for (j = i; j < (i + 3); j++) {
+            value <<= 8;
+
+            if (j < length) {
+                value |= (0xFF & input[j]);
+            }
+        }
+
+        NSInteger theIndex = (i / 3) * 4;
+        output[theIndex + 0] =                    table[(value >> 18) & 0x3F];
+        output[theIndex + 1] =                    table[(value >> 12) & 0x3F];
+        output[theIndex + 2] = (i + 1) < length ? table[(value >> 6)  & 0x3F] : '=';
+        output[theIndex + 3] = (i + 2) < length ? table[(value >> 0)  & 0x3F] : '=';
+    }
+
+    return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
 }
 
 @end

@@ -25,10 +25,10 @@ var PLUGINS = {
             dest: LUXAND_PLUGIN_DIR + '/libfsdk-static.a',
             src: "luxand-binary/libfsdk-static.a"
          },
-         {
+         /*{
             dest: LUXAND_PLUGIN_DIR + '/libfsdk-static_64.a',
             src: "luxand-binary/libfsdk-static_64.a"
-         }
+         }*/
     ]
 };
 

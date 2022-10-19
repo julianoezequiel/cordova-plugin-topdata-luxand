@@ -19,7 +19,6 @@
 @synthesize dbName = _dbName;
 @synthesize tryCount = _tryCount;
 @synthesize templatePath = _templatePath;
-@synthesize window = _window;
 @synthesize templateInit = _templateInit;
 @synthesize livenessParam = _livenessParam;
 @synthesize matchFacesParam = _matchFacesParam;
@@ -96,9 +95,9 @@
     NSLog(@"com.luxand: LIVENESS_PARAM %f", _livenessParam);
     
     _matchFacesParam = * new float([command.arguments[3] floatValue]);
-    //NSLog(@"com.luxand: MATCH_FACES_PARAM %f", _matchFacesParam);
+    NSLog(@"com.luxand: MATCH_FACES_PARAM %f", _matchFacesParam);
     
-    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount isRegister: true templatePath: [NSString stringWithUTF8String: self.templatePath] window: self.window templateInit: self.templateInit livenessParam: self.livenessParam matchFacesParam: self.matchFacesParam];
+    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount isRegister: true templatePath: [NSString stringWithUTF8String: self.templatePath] templateInit: self.templateInit livenessParam: self.livenessParam matchFacesParam: self.matchFacesParam];
 
     //laucn with
     [_processor performSelector:@selector(register) withObject:nil afterDelay:0];
@@ -117,7 +116,7 @@
     _matchFacesParam = * new float([command.arguments[3] floatValue]);
     NSLog(@"com.luxand: MATCH_FACES_PARAM %f", _matchFacesParam);
     
-    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount isRegister: false templatePath: [NSString stringWithUTF8String: self.templatePath] window: self.window templateInit: self.templateInit livenessParam: self.livenessParam matchFacesParam: self.matchFacesParam];
+    _processor = [[LuxandProcessor alloc] initWithPlugin:self callback: command.callbackId parentViewController: self.viewController licence: self.licence timeout: timeout retryCount: self.tryCount isRegister: false templatePath: [NSString stringWithUTF8String: self.templatePath] templateInit: self.templateInit livenessParam: self.livenessParam matchFacesParam: self.matchFacesParam];
     //laucn with
     [_processor performSelector:@selector(compare) withObject:nil afterDelay:0];
 }
@@ -165,7 +164,7 @@
 
 @implementation LuxandProcessor
 
-- (id)initWithPlugin:(Luxand*)plugin callback:(NSString*)callback parentViewController: (UIViewController*) parentViewController licence : (NSString*) licence timeout: (long) timeout retryCount: (long) retry isRegister:(BOOL) forRegister templatePath: (NSString*) dbPath window: (UIWindow*) uiWindow templateInit:(NSString *)templateInit livenessParam:(float) livenessParam matchFacesParam:(float) matchFacesParam
+- (id)initWithPlugin:(Luxand*)plugin callback:(NSString*)callback parentViewController: (UIViewController*) parentViewController licence : (NSString*) licence timeout: (long) timeout retryCount: (long) retry isRegister:(BOOL) forRegister templatePath: (NSString*) dbPath templateInit:(NSString *)templateInit livenessParam:(float) livenessParam matchFacesParam:(float) matchFacesParam
 {
     self.templatePath = dbPath;
     self.templateInit = templateInit;
@@ -176,7 +175,6 @@
     self.timeout = timeout;
     self.callback = callback;
     self.parentViewController = parentViewController;
-    self.window = uiWindow;
     self.livenessParam = livenessParam;
     self.matchFacesParam = matchFacesParam;
     
@@ -186,7 +184,6 @@
     self.plugin = nil;
     self.callback = nil;
     self.parentViewController = nil;
-    self.window = nil;
     //self.parentViewController = nil;
 }
 - (void) register{

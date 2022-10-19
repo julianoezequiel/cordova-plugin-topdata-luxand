@@ -24,7 +24,6 @@
     @property (nonatomic, readwrite) float livenessParam;
     @property (nonatomic, readwrite) float matchFacesParam;
     @property (nonatomic, readwrite) LuxandProcessor* processor;
-    @property (nonatomic, strong) IBOutlet UIWindow * window;
 @end
 
 
@@ -42,9 +41,8 @@
 @property (nonatomic, readwrite) NSString* templateInit;
 @property (nonatomic, readwrite) float livenessParam;
 @property (nonatomic, readwrite) float matchFacesParam;
-@property (nonatomic, strong) IBOutlet UIWindow * window;
 
-- (id)initWithPlugin:(Luxand*)plugin callback:(NSString*)callback parentViewController: (UIViewController*) parentViewController licence : (NSString*) licence timeout: (long) timeout retryCount: (long) retry isRegister:(BOOL) forIdenftifying templatePath: (NSString*) dbPath window: (UIWindow*) window templateInit: (NSString*) templateRef livenessParam: (float) livenessParam matchFacesParam: (float) matchFacesParam;
+- (id)initWithPlugin:(Luxand*)plugin callback:(NSString*)callback parentViewController: (UIViewController*) parentViewController licence : (NSString*) licence timeout: (long) timeout retryCount: (long) retry isRegister:(BOOL) forIdenftifying templatePath: (NSString*) dbPath templateInit: (NSString*) templateRef livenessParam: (float) livenessParam matchFacesParam: (float) matchFacesParam;
 - (void) compare;
 - (void) register;
 -(void) sendResult: (NSDictionary*) data;

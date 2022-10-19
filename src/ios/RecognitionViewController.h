@@ -36,8 +36,8 @@ typedef struct {
 
 @interface RecognitionViewController : UIViewController <RecognitionCameraDelegate>
 {
-	RecognitionCamera * camera;
-	UIScreen * screenForDisplay;
+    RecognitionCamera * camera;
+    UIScreen * screenForDisplay;
     LuxandProcessor* luxandProcessor;
 
     BOOL isRegister;
@@ -62,7 +62,7 @@ typedef struct {
     long long IDs[MAX_FACES];
 
     CGPoint currentTouchPoint;
-	
+    
     volatile int rotating;
     char videoStarted;
     
@@ -82,6 +82,7 @@ typedef struct {
 
 -(bool) compararTemplates: (HImage) imagemRef;
 -(bool) getTemplate: (HImage) imagemRef;
+-(bool) faceEnquadrada;
 -(void) response: (BOOL) error message:(NSString*) message;
 
 // OpenGL ES 2.0 setup methods
