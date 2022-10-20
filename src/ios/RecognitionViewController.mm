@@ -7,9 +7,14 @@ int const REGISTERED = 2;
 int const NOT_REGISTERED = 3;
 int const RECOGNIZED = 4;
 int const NOT_RECOGNIZED = 5;
+
 NSString * const ENQUADRE_ROSTO = @"ENQUADRE O ROSTO PARA O RECONHECIMENTO";
 NSString * const SUCESSO_RECONHECIMENTO = @"BIOMETRIA FACIAL RECONHECIDA";
 NSString * const FALHA_RECONHECIMENTO = @"FALHA NO RECONHECIMENTO FACIAL";
+
+NSString * const FRAME_BRANCO = @"frame_branco.png";
+NSString * const FRAME_AMARELO = @"frame_amarelo.png";
+NSString * const FRAME_VERDE = @"frame_verde.png";
 
 // GL attribute index.
 enum {
@@ -151,7 +156,14 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     CGFloat height = 250;
     CGFloat x = (mainScreenFrame.size.width - width) * 0.5f;
     CGFloat y = (mainScreenFrame.size.height - height) * 0.2f;
-    CGRect frame = CGRectMake(x, y, width, height);
+    
+    imageFrame = [[UIImageView alloc] initWithFrame:CGRectMake(x, y, width, height)];
+    imageFrame.image = [UIImage imageNamed: FRAME_BRANCO];
+    // optional:
+    // [imageHolder sizeToFit];
+    [self.view addSubview: imageFrame];
+    
+    /*CGRect frame = CGRectMake(x, y, width, height);
     
     UIView *frameView = [[UIView alloc] initWithFrame: frame];
     
@@ -159,14 +171,9 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     frameView.layer.borderColor = [[UIColor blueColor] CGColor];
     frameView.layer.borderWidth = 3.0;
     
-    [self.view addSubview: frameView];
+    [self.view addSubview: frameView];*/
     
-    UIImageView * imageHolder = [[UIImageView alloc] initWithFrame:CGRectMake(x, y, width, height)];
-    UIImage *image = [UIImage imageNamed:@"frame_branco.png"];
-    imageHolder.image = image;
-    // optional:
-    // [imageHolder sizeToFit];
-    [self.view addSubview:imageHolder];
+
     
     // CONFIGURANDO BARRA NA PARTE SUPERIOR DA TELA
     /*UIToolbar * toolbarHeader = [UIToolbar new];
@@ -246,7 +253,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     [self loadVertexShader:@"DirectDisplayShader" fragmentShader:@"DirectDisplayShader" forProgram:&directDisplayProgram];
      
     // Desenhando frames nos rostos detectados
-    for (int i=0; i<MAX_FACES; ++i) {
+    /*for (int i=0; i<MAX_FACES; ++i) {
         trackingRects[i] = [[CALayer alloc] init];
         trackingRects[i].bounds = CGRectMake(0.0f, 0.0f, 0.0f, 0.0f);
         trackingRects[i].cornerRadius = 0.0f;
@@ -265,7 +272,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
         [nameLabels[i] setAlignmentMode:kCAAlignmentCenter];
         //[trackingRects[i] addSublayer:nameLabels[i]];
         //nameLabels[i]  = nil;
-    }
+    }*/
     
     // Disable animations for move and resize (otherwise trackingRect will jump)
     for (int i=0; i<MAX_FACES; ++i) {
@@ -303,7 +310,6 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     
     // Make sure it is stopped
     [_labelTimer invalidate];
-    [_responseTimer invalidate];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -311,9 +317,6 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     // Stop the timer when we leave
     [_labelTimer invalidate];
     _labelTimer = nil;
-    
-    [_responseTimer invalidate];
-    _responseTimer = nil;
 }
 
 
@@ -850,14 +853,20 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
         faces[i].y2 *= ratio;
         //NSLog(@"w=%d x=%d y=%d", faces[i].x1, faces[i].x2, faces[i].y1);
         
-        if (_closing == 0)
+        if (_closing == 0) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self -> textInfo setText: ENQUADRE_ROSTO];
             });
+        }
+
     }
     [faceDataLock unlock];
 
     if ([self faceEnquadrada] && count == 1 && _closing == 0) {
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self -> imageFrame setImage:[UIImage imageNamed: FRAME_AMARELO]];
+        });
         
         char * value = (char *) malloc(1024);
         float liveness = 0;
@@ -885,14 +894,18 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
                     
                     // Mark and name faces
                     for(int i=0;i<count; i++) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self -> imageFrame setImage:[UIImage imageNamed: FRAME_AMARELO]];
+                        });
                         identified = [self compararTemplates: derotated_image];
                     }
                     
                     if(tryCount <= initialTryCount && identified) {
                         _closing = 1;
-                        
+
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [self -> textInfo setText: SUCESSO_RECONHECIMENTO];
+                            [self -> imageFrame setImage:[UIImage imageNamed: FRAME_VERDE]];
                         });
                         
                         NSLog(@"com.luxand: FACE_EQUALS");
@@ -918,6 +931,9 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
                 }else if(count == 1 && [self faceEnquadrada]){
                         
                     tryCount++;
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self -> imageFrame setImage:[UIImage imageNamed: FRAME_AMARELO]];
+                    });
                     
                     BOOL ok = [self getTemplate: derotated_image];
                         
@@ -932,6 +948,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
                     
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self -> textInfo setText: SUCESSO_RECONHECIMENTO];
+                        [self -> imageFrame setImage:[UIImage imageNamed: FRAME_VERDE]];
                     });
                     
                     NSLog(@"com.luxand: REGISTERED");
@@ -943,10 +960,14 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
             NSLog(@"com.luxand: FAKE -> %f", liveness);
         }
     } else {
-        if (_closing == 0)
+        if (_closing == 0) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self -> textInfo setText: ENQUADRE_ROSTO];
+                [self -> imageFrame setImage: [UIImage imageNamed: FRAME_BRANCO]];
             });
+            
+        }
+
     }
     
     FSDK_FreeImage(image);
@@ -999,22 +1020,28 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
 }
 
 - (bool) faceEnquadrada {
-    /*NSLog(@"");
-    NSLog(@"----------------------------");
-    NSLog(@"com.luxand: FACE X1 -> %d", faces[0].x1);
-    NSLog(@"com.luxand: FACE Y1 -> %d", faces[0].y1);
-    NSLog(@"com.luxand: FACE X2 -> %d", faces[0].x2);
-    NSLog(@"com.luxand: FACE Y2 -> %d", faces[0].y2);
-    NSLog(@"----------------------------");*/
+
     
     // FRAME FIXO
     CGRect mainScreenFrame = [[UIScreen mainScreen] bounds];
     CGFloat width = 230;
     CGFloat height = 250;
-    float x = (mainScreenFrame.size.width - width) * 0.5f;
-    float y = (mainScreenFrame.size.height - height) * 0.2f;
     
-    return (x >= faces[0].x1 && faces[0].x1 > 55) && (x <= faces[0].x2) && (y >= faces[0].y1) && (y <= faces[0].y2);
+    int margemAcerto = 40;
+    
+    float x1 = (mainScreenFrame.size.width - width) * 0.5f;
+    float x2 = (mainScreenFrame.size.width * 0.5f) + width;
+    
+    float y1 = (mainScreenFrame.size.height - height) * 0.2f;
+    float y2 = y1 + height;
+    
+    float leftAcerto = x1 - margemAcerto;
+    float topAcerto = y1 - margemAcerto;
+    float rightAcerto = x2 + margemAcerto;
+    float bottomAcerto = y2 + margemAcerto;
+
+    return faces[0].x1 >= leftAcerto && faces[0].y1 >= topAcerto && faces[0].x2 <= rightAcerto && faces[0].y2 <= bottomAcerto;
+    
 }
 
 -(NSString *) encondeToBase64: (char *) theData {

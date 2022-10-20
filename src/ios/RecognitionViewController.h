@@ -70,10 +70,10 @@ typedef struct {
     
     // FOR LAYOUT
     UIToolbar * toolbar;
-    NSTimer * _labelTimer;
     UILabel * textInfo;
     UILabel * textTime;
-    NSTimer * _responseTimer;
+    NSTimer * _labelTimer;
+    UIImageView * imageFrame;
 }
 
 @property(readonly) RecognitionGLView * glView;
