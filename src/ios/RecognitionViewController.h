@@ -67,7 +67,13 @@ typedef struct {
     char videoStarted;
     
     volatile int clearTracker;
+    
+    // FOR LAYOUT
     UIToolbar * toolbar;
+    NSTimer * _labelTimer;
+    UILabel * textInfo;
+    UILabel * textTime;
+    NSTimer * _responseTimer;
 }
 
 @property(readonly) RecognitionGLView * glView;

@@ -34,9 +34,9 @@
         <resource-file src="src/android/layout/bottom_menu.xml" target="res/layout/bottom_menu.xml" />
         <resource-file src="src/android/layout/main.xml" target="res/layout/main.xml" />
 
-        <resource-file src="src/android/frames/frame_branco.png" target="res/drawable-port-xxxhdpi/frame_branco.png" />
-        <resource-file src="src/android/frames/frame_amarelo.png" target="res/drawable-port-xxxhdpi/frame_amarelo.png" />
-        <resource-file src="src/android/frames/frame_verde.png" target="res/drawable-port-xxxhdpi/frame_verde.png" />
+        <resource-file src="src/frames/frame_branco.png" target="res/drawable-port-xxxhdpi/frame_branco.png" />
+        <resource-file src="src/frames/frame_amarelo.png" target="res/drawable-port-xxxhdpi/frame_amarelo.png" />
+        <resource-file src="src/frames/frame_verde.png" target="res/drawable-port-xxxhdpi/frame_verde.png" />
         <!-- <resource-file src="src/android/values/colors.xml" target="res/values/colors.xml" />
         <resource-file src="src/android/values/strings.xml" target="res/values/strings.xml" />
         <resource-file src="src/android/values/styles.xml" target="res/values/styles.xml" /> -->
@@ -71,6 +71,11 @@
 
         <resource-file src="src/ios/DirectDisplayShader.vsh" />
         <resource-file src="src/ios/DirectDisplayShader.fsh" />
+
+        <resource-file src="src/frames/frame_branco.png" />
+        <resource-file src="src/frames/frame_amarelo.png" />
+        <resource-file src="src/frames/frame_verde.png" />
+
         <hook src="scripts/process_copy_ios_sdk.js" type="before_plugin_install"/>
         <!-- frameworks -->
         <!-- <framework src="AVFoundation.framework" /> -->

@@ -7,6 +7,9 @@ int const REGISTERED = 2;
 int const NOT_REGISTERED = 3;
 int const RECOGNIZED = 4;
 int const NOT_RECOGNIZED = 5;
+NSString * const ENQUADRE_ROSTO = @"ENQUADRE O ROSTO PARA O RECONHECIMENTO";
+NSString * const SUCESSO_RECONHECIMENTO = @"BIOMETRIA FACIAL RECONHECIDA";
+NSString * const FALHA_RECONHECIMENTO = @"FALHA NO RECONHECIMENTO FACIAL";
 
 // GL attribute index.
 enum {
@@ -158,59 +161,87 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     
     [self.view addSubview: frameView];
     
-
-    //_glView = nil; //now self.view is responsible for the view
-
+    UIImageView * imageHolder = [[UIImageView alloc] initWithFrame:CGRectMake(x, y, width, height)];
+    UIImage *image = [UIImage imageNamed:@"frame_branco.png"];
+    imageHolder.image = image;
+    // optional:
+    // [imageHolder sizeToFit];
+    [self.view addSubview:imageHolder];
     
-    // Set up the toolbar at the bottom of the screen
-    /*toolbar = [UIToolbar new];
+    // CONFIGURANDO BARRA NA PARTE SUPERIOR DA TELA
+    /*UIToolbar * toolbarHeader = [UIToolbar new];
+    toolbarHeader.barStyle = UIBarStyleBlack;
+    toolbarHeader.backgroundColor =[UIColor colorWithDisplayP3Red:39 green:39 blue:39 alpha:1];
+
+    CGRect mainViewBounds = self.view.bounds;
+    
+    [toolbarHeader sizeToFit];
+    [toolbarHeader setFrame:CGRectMake(0, 0, CGRectGetWidth(mainViewBounds), 20)];
+    
+    [self.view addSubview: toolbarHeader];*/
+    
+    // CONFIGURANDO A BARRA NA PARTE INFERIOR DA TELA
+    toolbar = [UIToolbar new];
     toolbar.barStyle = UIBarStyleBlack;
     toolbar.backgroundColor =[UIColor colorWithDisplayP3Red:39 green:39 blue:39 alpha:1];
-    
-    
-    /*UIBarButtonItem * clearItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash
-        target:self action:nil];
-    
-    UIBarButtonItem * flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    
-    UIBarButtonItem * helpItem = [[UIBarButtonItem alloc] initWithTitle:@"?"
-        style:UIBarButtonItemStylePlain
-        target:self
-        action:nil];
-    
-    toolbar.items = [NSArray arrayWithObjects: clearItem, flexibleSpace, helpItem, nil];
-    clearItem = nil;
-    flexibleSpace = nil;
-    helpItem = nil;
-    
-    // size up the toolbar and set its frame, note that it will work only for views without Navigation toolbars.
-    [toolbar sizeToFit];
-    CGFloat toolbarHeight = 150;
+
+    CGFloat toolbarHeight = 170;
     CGRect mainViewBounds = self.view.bounds;
+    
+    UIView *myView = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMinX(mainViewBounds),
+                                                              CGRectGetMinY(mainViewBounds) + CGRectGetHeight(mainViewBounds) - (toolbarHeight),
+                                                              CGRectGetWidth(mainViewBounds),
+                                                              toolbarHeight)];
+    
+    UIBarButtonItem * myViewItem = [[UIBarButtonItem alloc] initWithCustomView: myView];
+    
+    UIBarButtonItem *flexibleSpace =  [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    
+    toolbar.items = [NSArray arrayWithObjects: flexibleSpace, myViewItem, flexibleSpace, nil];
+    
+    [toolbar sizeToFit];
     [toolbar setFrame:CGRectMake(CGRectGetMinX(mainViewBounds),
                                  CGRectGetMinY(mainViewBounds) + CGRectGetHeight(mainViewBounds) - (toolbarHeight),
                                  CGRectGetWidth(mainViewBounds),
                                  toolbarHeight)];
-    [self.view addSubview:toolbar];*/
-    //toolbar = nil;
     
-    // teste primaryView.frame = CGRectMake(0, 0, 320 , self.view.frame.size.height - 50);
+    [self.view addSubview:toolbar];
+
+    // CONFIGURANDO RELÓGIO
+    textTime = [[UILabel alloc] initWithFrame: CGRectMake(0, 0, 0, 0)];
+    textTime.backgroundColor = [UIColor clearColor];
     
-    UILabel *label = [[UILabel alloc] initWithFrame: CGRectMake(0, 0, 0, 0)];
-    label.backgroundColor = [UIColor clearColor];
-    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:label];
-    label.text = @"ENQUADRE O ROSTO PARA O RECONHECIMENTO";
-    label.textAlignment = NSTextAlignmentCenter;
+    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat: @"HH:mm:ss"];
+    NSString * dateString = [dateFormatter stringFromDate:[NSDate date]];
+
+    textTime.text = dateString;
     
-    [label setFont:[UIFont systemFontOfSize: 15]];
+    textTime.textAlignment = NSTextAlignmentCenter;
+    [textTime setFont:[UIFont boldSystemFontOfSize: 16]];
+    textTime.numberOfLines = 1;
+    CGSize maximumLabelSize = CGSizeMake(textTime.frame.size.width, CGFLOAT_MAX);
+    CGSize expectSize = [textTime sizeThatFits:maximumLabelSize];
+    textTime.frame = CGRectMake(myView.frame.size.width / 2 - 35, textTime.frame.origin.y, expectSize.width + 5, expectSize.height + 10);
     
-    label.numberOfLines = 1;
-    CGSize maximumLabelSize = CGSizeMake(label.frame.size.width, CGFLOAT_MAX);
-    CGSize expectSize = [label sizeThatFits:maximumLabelSize];
+    [myView addSubview: textTime];
     
-    label.frame = CGRectMake(label.frame.origin.x, label.frame.origin.y, expectSize.width, expectSize.height);
+    _labelTimer = [NSTimer scheduledTimerWithTimeInterval: 1.0 repeats:YES block:^(NSTimer *timer) {
+        self -> textTime.text = [dateFormatter stringFromDate:[NSDate date]];
+    }];
     
-    [toolbar addSubview: label];
+    // CONFIGURANDO TEXTO DE INFORMAÇĀO
+    textInfo = [[UILabel alloc] initWithFrame: CGRectMake(0, 0, 0, 0)];
+    textInfo.backgroundColor = [UIColor clearColor];
+    textInfo.text = ENQUADRE_ROSTO;
+    textInfo.textAlignment = NSTextAlignmentCenter;
+    [textInfo setFont:[UIFont boldSystemFontOfSize: 15]];
+    textInfo.numberOfLines = 1;
+    maximumLabelSize = CGSizeMake(textInfo.frame.size.width, CGFLOAT_MAX);
+    expectSize = [textInfo sizeThatFits:maximumLabelSize];
+    textInfo.frame = CGRectMake(textInfo.frame.origin.x + 9, textInfo.frame.origin.y, expectSize.width, expectSize.height + 100);
+    
+    [myView addSubview: textInfo];
     
     [self loadVertexShader:@"DirectDisplayShader" fragmentShader:@"DirectDisplayShader" forProgram:&directDisplayProgram];
      
@@ -269,8 +300,21 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     camera = nil;
     faceDataLock = nil;
     faceDataLock = NULL;
+    
+    // Make sure it is stopped
+    [_labelTimer invalidate];
+    [_responseTimer invalidate];
 }
 
+- (void)viewDidDisappear:(BOOL)animated {
+    
+    // Stop the timer when we leave
+    [_labelTimer invalidate];
+    _labelTimer = nil;
+    
+    [_responseTimer invalidate];
+    _responseTimer = nil;
+}
 
 
 #pragma mark -
@@ -805,10 +849,15 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
         faces[i].y1 *= ratio;
         faces[i].y2 *= ratio;
         //NSLog(@"w=%d x=%d y=%d", faces[i].x1, faces[i].x2, faces[i].y1);
+        
+        if (_closing == 0)
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self -> textInfo setText: ENQUADRE_ROSTO];
+            });
     }
     [faceDataLock unlock];
 
-    if ([self faceEnquadrada]) {
+    if ([self faceEnquadrada] && count == 1 && _closing == 0) {
         
         char * value = (char *) malloc(1024);
         float liveness = 0;
@@ -832,7 +881,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
                     if(tryCount< initialTryCount) {
                         NSLog(@"com.luxand: Múltiplas faces detectadas...");
                     }
-                }else if(count == 1) {
+                }else if(count == 1 && [self faceEnquadrada]) {
                     
                     // Mark and name faces
                     for(int i=0;i<count; i++) {
@@ -840,9 +889,14 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
                     }
                     
                     if(tryCount <= initialTryCount && identified) {
+                        _closing = 1;
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self -> textInfo setText: SUCESSO_RECONHECIMENTO];
+                        });
+                        
                         NSLog(@"com.luxand: FACE_EQUALS");
                         [self response:false message:@"FACE_EQUALS"];
-                        _closing = 1;
                         return;
                     }
                     
@@ -861,28 +915,38 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
                     if(tryCount < initialTryCount) {
                         NSLog(@"com.luxand: Múltiplas faces detectadas...");
                     }
-                }else if(count == 1){
+                }else if(count == 1 && [self faceEnquadrada]){
                         
-                        tryCount++;
+                    tryCount++;
                     
-                        BOOL ok = [self getTemplate: derotated_image];
+                    BOOL ok = [self getTemplate: derotated_image];
                         
-                        if (!ok) {
-                            NSLog(@"com.luxand: ERROR_GET_TEMPLATE");
-                            [self response: true message: @"ERROR_GET_TEMPLATE"];
-                            _closing = 1;
-                            return;
-                        }
-                        
-                        NSLog(@"com.luxand: REGISTERED");
-                        [self response: false message: @"REGISTERED"];
+                    if (!ok) {
+                        NSLog(@"com.luxand: ERROR_GET_TEMPLATE");
+                        [self response: true message: @"ERROR_GET_TEMPLATE"];
                         _closing = 1;
                         return;
+                    }
+                        
+                    _closing = 1;
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self -> textInfo setText: SUCESSO_RECONHECIMENTO];
+                    });
+                    
+                    NSLog(@"com.luxand: REGISTERED");
+                    [self response: false message: @"REGISTERED"];
+                    return;
                 }
             }
         } else {
             NSLog(@"com.luxand: FAKE -> %f", liveness);
         }
+    } else {
+        if (_closing == 0)
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self -> textInfo setText: ENQUADRE_ROSTO];
+            });
     }
     
     FSDK_FreeImage(image);
@@ -896,7 +960,11 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     [ret setObject:message forKey:@"message"];
     [ret setObject: templateResponse && isRegister ? templateResponse : @""  forKey:@"template"];
     
-    [luxandProcessor sendResult:ret];
+    NSTimeInterval delayInSeconds = 1.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [self -> luxandProcessor sendResult:ret];
+    });
 }
 
 -(bool) compararTemplates: (HImage) imagemRef {
