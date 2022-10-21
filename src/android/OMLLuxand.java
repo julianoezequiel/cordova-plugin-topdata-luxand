@@ -148,7 +148,7 @@ public class OMLLuxand extends Activity implements OnClickListener {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
                 Date dateTime = new Date();
                 String dateTimeString = formatter.format(dateTime);
 
