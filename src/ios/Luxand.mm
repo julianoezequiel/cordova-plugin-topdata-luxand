@@ -27,8 +27,7 @@
 -(BOOL)notHasPermission
 {
     AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    return (authStatus == AVAuthorizationStatusDenied ||
-            authStatus == AVAuthorizationStatusRestricted);
+    return (authStatus == AVAuthorizationStatusDenied || authStatus == AVAuthorizationStatusRestricted);
 }
 
 -(BOOL)isUsageDescriptionSet
@@ -187,12 +186,25 @@
     //self.parentViewController = nil;
 }
 - (void) register{
-    viewController = [[RecognitionViewController alloc] initWithProcessor: [UIScreen mainScreen] processor:self];
-    [self.parentViewController presentViewController: viewController animated: false completion:nil];
+    
+    if ([self.plugin notHasPermission]) {
+        NSDictionary* response = [[NSDictionary alloc] initWithObjectsAndKeys:@"Illegal access", @"message", nil];
+        [self.plugin sendError: response commandId: self.callback];
+    } else {
+        viewController = [[RecognitionViewController alloc] initWithProcessor: [UIScreen mainScreen] processor:self];
+        viewController.modalPresentationStyle = UIModalPresentationFullScreen;
+        [self.parentViewController presentViewController: viewController animated: false completion:nil];
+    }
 }
 - (void) compare{
-    viewController = [[RecognitionViewController alloc] initWithProcessor: [UIScreen mainScreen] processor:self];
-    [self.parentViewController presentViewController: viewController animated: false completion:nil];
+    if ([self.plugin notHasPermission]) {
+        NSDictionary* response = [[NSDictionary alloc] initWithObjectsAndKeys:@"Illegal access", @"message", nil];
+        [self.plugin sendError: response commandId: self.callback];
+    } else {
+        viewController = [[RecognitionViewController alloc] initWithProcessor: [UIScreen mainScreen] processor:self];
+        viewController.modalPresentationStyle = UIModalPresentationFullScreen;
+        [self.parentViewController presentViewController: viewController animated: false completion:nil];
+    }
 }
 -(void) sendResult: (NSDictionary*) data {
     [self.plugin sendSuccess:data commandId: self.callback];

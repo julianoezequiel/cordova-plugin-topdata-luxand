@@ -12,7 +12,7 @@
 #import "RecognitionGLView.h"
 #include "LuxandFaceSDK.h"
 
-#define MAX_FACES 5
+#define MAX_FACES 1
 
 #define MAX_NAME_LEN 1024
 @class LuxandProcessor;
