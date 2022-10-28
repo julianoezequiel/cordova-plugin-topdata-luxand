@@ -139,13 +139,13 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
 - (void)loadView
 {
     CGRect mainScreenFrame = [[UIScreen mainScreen] bounds];
+    
     UIView *primaryView = [[UIView alloc] initWithFrame:mainScreenFrame];
+    primaryView.backgroundColor =[UIColor darkGrayColor];
+    
     self.view = primaryView;
     primaryView = nil; //now self is responsible for the view
-    
-    //CGRect applicationFrame = [screenForDisplay applicationFrame];
-    //_glView = [[RecognitionGLView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, applicationFrame.size.width, applicationFrame.size.height)];
-    
+
     _glView = [[RecognitionGLView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, mainScreenFrame.size.width, mainScreenFrame.size.height)];
     //_glView will be re-initialized in (void)drawFrame with proper size
 
@@ -190,15 +190,15 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     // CONFIGURANDO A BARRA NA PARTE INFERIOR DA TELA
     toolbar = [UIToolbar new];
     toolbar.barStyle = UIBarStyleBlack;
-    toolbar.backgroundColor =[UIColor colorWithDisplayP3Red:39 green:39 blue:39 alpha:1];
 
-    CGFloat toolbarHeight = 170;
+    CGFloat toolbarHeight = 160;
     CGRect mainViewBounds = self.view.bounds;
     
     UIView *myView = [[UIView alloc] initWithFrame:CGRectMake(CGRectGetMinX(mainViewBounds),
                                                               CGRectGetMinY(mainViewBounds) + CGRectGetHeight(mainViewBounds) - (toolbarHeight),
                                                               CGRectGetWidth(mainViewBounds),
                                                               toolbarHeight)];
+    myView.backgroundColor = [UIColor darkGrayColor];
     
     UIBarButtonItem * myViewItem = [[UIBarButtonItem alloc] initWithCustomView: myView];
     
@@ -225,11 +225,11 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     textTime.text = dateString;
     
     textTime.textAlignment = NSTextAlignmentCenter;
-    [textTime setFont:[UIFont boldSystemFontOfSize: 16]];
+    [textTime setFont:[UIFont boldSystemFontOfSize: 18]];
     textTime.numberOfLines = 1;
     CGSize maximumLabelSize = CGSizeMake(textTime.frame.size.width, CGFLOAT_MAX);
     CGSize expectSize = [textTime sizeThatFits:maximumLabelSize];
-    textTime.frame = CGRectMake(myView.frame.size.width / 2 - 35, textTime.frame.origin.y, expectSize.width + 5, expectSize.height + 10);
+    textTime.frame = CGRectMake(myView.frame.size.width / 2 - 35, textTime.frame.origin.y, expectSize.width + 5, expectSize.height + 50);
     
     [myView addSubview: textTime];
     
@@ -246,7 +246,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     textInfo.numberOfLines = 1;
     maximumLabelSize = CGSizeMake(textInfo.frame.size.width, CGFLOAT_MAX);
     expectSize = [textInfo sizeThatFits:maximumLabelSize];
-    textInfo.frame = CGRectMake(textInfo.frame.origin.x + 9, textInfo.frame.origin.y, expectSize.width, expectSize.height + 100);
+    textInfo.frame = CGRectMake(textInfo.frame.origin.x + 9, textInfo.frame.origin.y, expectSize.width, expectSize.height + 170);
     
     [myView addSubview: textInfo];
     
