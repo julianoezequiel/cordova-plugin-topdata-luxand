@@ -965,9 +965,7 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
                 [self -> textInfo setText: ENQUADRE_ROSTO];
                 [self -> imageFrame setImage: [UIImage imageNamed: FRAME_BRANCO]];
             });
-            
         }
-
     }
     
     FSDK_FreeImage(image);
@@ -976,6 +974,9 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
 }
 
 -(void) response: (BOOL) error message:(NSString*) message {
+    
+    FSDK_FreeTracker(_tracker);
+    
     NSMutableDictionary *ret = [[NSMutableDictionary alloc] initWithObjectsAndKeys:(error ? @"FAIL" :@"SUCCESS"), @"status", nil];
     [ret setObject:@(error) forKey:@"error"];
     [ret setObject:message forKey:@"message"];
@@ -1003,6 +1004,9 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     float similarity = 0;
     FSDK_MatchFaces(faceTemplateDetected, faceTemplateRef, &similarity);
     
+    free(faceTemplateRef);
+    free(faceTemplateDetected);
+    
     // As faces sāo iguais?
     return similarity > luxandProcessor.matchFacesParam;
 }
@@ -1015,6 +1019,8 @@ int GetFaceFrame(const FSDK_Features * Features, int * x1, int * y1, int * x2, i
     
     // Codifica o template da face detectada: array de char -> base64
     templateResponse = [self encondeToBase64: faceTemplate -> ftemplate];
+    
+    free(faceTemplate);
     
     return ok == FSDKE_OK;
 }
