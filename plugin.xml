@@ -78,6 +78,7 @@
 
         <hook src="scripts/process_copy_ios_sdk.js" type="before_plugin_install"/>
         <!-- frameworks -->
+        <framework src="libz.dylib" />
         <!-- <framework src="AVFoundation.framework" /> -->
     </platform>
     
