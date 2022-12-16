@@ -43,17 +43,17 @@
         <hook src="scripts/process_copy_android_sdk.js" type="before_plugin_install" />
     </platform>
     <platform name="ios">
+
         <config-file target="config.xml" parent="/*">
             <feature name="Luxand">
                 <param name="ios-package" value="Luxand"/>
             </feature>
         </config-file>
-        <!-- <edit-config target="NSCameraUsageDescription" file="*-Info.plist" mode="merge">
-            <string>${PRODUCT_NAME} requires access to your phone’s camera.</string>
-        </edit-config> -->
+
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
-             <string>${PRODUCT_NAME} requires access to your phone’s camera.</string>
+             <string>A câmera é utilizada para autenticar sua marcação de ponto</string>
         </config-file>
+
         <source-file src="libfsdk-static.a" framework="true" />
         <!-- <source-file src="libfsdk-static_64.a" framework="true" /> -->
         <header-file src="src/ios/LuxandFaceSDK.h"/>
