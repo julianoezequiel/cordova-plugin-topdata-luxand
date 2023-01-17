@@ -17,7 +17,7 @@
             <uses-feature android:name="android.hardware.camera" android:required="true"/>
         </config-file>
          <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <activity android:name="com.luxand.dsi.OMLLuxand" android:launchMode="singleTop"/>
+            <activity android:name="com.luxand.dsi.OMLLuxand" android:launchMode="singleTop" android:exported="false"/>
         </config-file>
 -        <source-file src="src/android/FSDK.java" target-dir="src/com/luxand" />
         <source-file src="src/android/Constants.java" target-dir="src/com/luxand/dsi" />
