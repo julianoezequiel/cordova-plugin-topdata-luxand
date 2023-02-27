@@ -25,7 +25,7 @@ var LuxandOriginal = /** @class */ (function (_super) {
     LuxandOriginal.pluginName = "Luxand";
     LuxandOriginal.plugin = "codova-plugin-topdata-luxand";
     LuxandOriginal.pluginRef = "window.Luxand";
-    LuxandOriginal.repo = "https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand";
+    LuxandOriginal.repo = "https://github.com/topdatadev/cordova-plugin-topdata-luxand";
     LuxandOriginal.platforms = ["Android", "iOS"];
     return LuxandOriginal;
 }(IonicNativePlugin));

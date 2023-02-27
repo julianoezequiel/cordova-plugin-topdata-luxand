@@ -14,7 +14,7 @@ var Luxand = /** @class */ (function (_super) {
     Luxand.pluginName = "Luxand";
     Luxand.plugin = "codova-plugin-topdata-luxand";
     Luxand.pluginRef = "window.Luxand";
-    Luxand.repo = "https://github.com/Vinicius-Felipe-T/cordova-plugin-topdata-luxand";
+    Luxand.repo = "https://github.com/topdatadev/cordova-plugin-topdata-luxand";
     Luxand.platforms = ["Android", "iOS"];
     Luxand.decorators = [
         { type: Injectable }
